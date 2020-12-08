@@ -1,6 +1,9 @@
 package railsassets
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/paketo-buildpacks/packit"
@@ -19,6 +22,9 @@ func Build(
 ) packit.BuildFunc {
 	return func(context packit.BuildContext) (packit.BuildResult, error) {
 		logger.Title("%s %s", context.BuildpackInfo.Name, context.BuildpackInfo.Version)
+
+		os.Setenv("PATH", fmt.Sprintf("%s:%s", os.Getenv("PATH"), filepath.Join(context.WorkingDir, "node_modules", ".bin")))
+		os.Setenv("PATH", fmt.Sprintf("%s:%s", os.Getenv("PATH"), filepath.Join(context.WorkingDir, "bin")))
 
 		logger.Process("Executing build process")
 		duration, err := clock.Measure(func() error {
