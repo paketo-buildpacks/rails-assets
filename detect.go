@@ -14,6 +14,7 @@ type Parser interface {
 }
 
 type BuildPlanMetadata struct {
+	Build  bool `toml:"build"`
 	Launch bool `toml:"launch"`
 }
 
@@ -56,6 +57,18 @@ func Detect(gemfileParser Parser) packit.DetectFunc {
 						Name: "mri",
 						Metadata: BuildPlanMetadata{
 							Launch: true,
+						},
+					},
+					{
+						Name: "node",
+						Metadata: BuildPlanMetadata{
+							Build: true,
+						},
+					},
+					{
+						Name: "yarn",
+						Metadata: BuildPlanMetadata{
+							Build: true,
 						},
 					},
 				},

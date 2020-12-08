@@ -29,6 +29,15 @@ var settings struct {
 		BundleInstall struct {
 			Online string
 		}
+		Yarn struct {
+			Online string
+		}
+		Puma struct {
+			Online string
+		}
+		NodeEngine struct {
+			Online string
+		}
 	}
 
 	Buildpack struct {
@@ -40,6 +49,9 @@ var settings struct {
 		MRI           string `json:"mri"`
 		Bundler       string `json:"bundler"`
 		BundleInstall string `json:"bundle-install"`
+		Puma          string `json:"puma"`
+		NodeEngine    string `json:"node-engine"`
+		Yarn          string `json:"yarn"`
 	}
 }
 
@@ -78,6 +90,18 @@ func TestIntegration(t *testing.T) {
 
 	settings.Buildpacks.BundleInstall.Online, err = buildpackStore.Get.
 		Execute(settings.Config.BundleInstall)
+	Expect(err).NotTo(HaveOccurred())
+
+	settings.Buildpacks.Puma.Online, err = buildpackStore.Get.
+		Execute(settings.Config.Puma)
+	Expect(err).NotTo(HaveOccurred())
+
+	settings.Buildpacks.NodeEngine.Online, err = buildpackStore.Get.
+		Execute(settings.Config.NodeEngine)
+	Expect(err).NotTo(HaveOccurred())
+
+	settings.Buildpacks.Yarn.Online, err = buildpackStore.Get.
+		Execute(settings.Config.Yarn)
 	Expect(err).NotTo(HaveOccurred())
 
 	SetDefaultEventuallyTimeout(10 * time.Second)

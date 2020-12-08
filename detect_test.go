@@ -75,6 +75,18 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 							Launch: true,
 						},
 					},
+					{
+						Name: "node",
+						Metadata: railsassets.BuildPlanMetadata{
+							Build: true,
+						},
+					},
+					{
+						Name: "yarn",
+						Metadata: railsassets.BuildPlanMetadata{
+							Build: true,
+						},
+					},
 				},
 			}))
 		})

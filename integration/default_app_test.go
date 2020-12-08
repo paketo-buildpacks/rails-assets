@@ -25,7 +25,7 @@ func testDefaultApp(t *testing.T, context spec.G, it spec.S) {
 	)
 
 	it.Before(func() {
-		pack = occam.NewPack()
+		pack = occam.NewPack().WithVerbose()
 		docker = occam.NewDocker()
 	})
 
@@ -62,7 +62,10 @@ func testDefaultApp(t *testing.T, context spec.G, it spec.S) {
 					settings.Buildpacks.MRI.Online,
 					settings.Buildpacks.Bundler.Online,
 					settings.Buildpacks.BundleInstall.Online,
+					settings.Buildpacks.NodeEngine.Online,
+					settings.Buildpacks.Yarn.Online,
 					settings.Buildpacks.RailsAssets.Online,
+					settings.Buildpacks.Puma.Online,
 				).
 				WithPullPolicy("never").
 				Execute(name, source)
