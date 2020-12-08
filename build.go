@@ -23,6 +23,7 @@ func Build(
 	return func(context packit.BuildContext) (packit.BuildResult, error) {
 		logger.Title("%s %s", context.BuildpackInfo.Name, context.BuildpackInfo.Version)
 
+		// TODO: Confirm these are needed
 		os.Setenv("PATH", fmt.Sprintf("%s:%s", os.Getenv("PATH"), filepath.Join(context.WorkingDir, "node_modules", ".bin")))
 		os.Setenv("PATH", fmt.Sprintf("%s:%s", os.Getenv("PATH"), filepath.Join(context.WorkingDir, "bin")))
 
@@ -33,6 +34,11 @@ func Build(
 		if err != nil {
 			return packit.BuildResult{}, err
 		}
+
+		// envLayer, err := context.Layers.Get(LayerNameGems, packit.LaunchLayer, packit.CacheLayer)
+		// if err != nil {
+		// return packit.BuildResult{}, err
+		// }
 
 		logger.Action("Completed in %s", duration.Round(time.Millisecond))
 		logger.Break()
