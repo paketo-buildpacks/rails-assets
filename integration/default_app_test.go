@@ -68,7 +68,6 @@ func testDefaultApp(t *testing.T, context spec.G, it spec.S) {
 					settings.Buildpacks.Puma.Online,
 				).
 				WithPullPolicy("never").
-				WithEnv(map[string]string{"RAILS_ENV": "production"}).
 				Execute(name, source)
 			Expect(err).NotTo(HaveOccurred(), logs.String())
 
@@ -89,9 +88,8 @@ func testDefaultApp(t *testing.T, context spec.G, it spec.S) {
 
 			Expect(logs).To(ContainLines(
 				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, settings.Buildpack.Name)),
-				"Running 'bundle exec rails assets:precompile'",
-				// "  Assigning launch processes",
-				// "    web: bundle exec puma --bind tcp://0.0.0.0:${PORT:-9292}",
+				"  Executing build process",
+				"    Running 'bundle exec rails assets:precompile'",
 			))
 		})
 	})

@@ -1,48 +1,48 @@
 package railsassets
 
 import (
-	"fmt"
-	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/paketo-buildpacks/packit"
 	"github.com/paketo-buildpacks/packit/chronos"
 )
 
-//go:generate faux --interface InstallProcess --output fakes/install_process.go
-type InstallProcess interface {
+const (
+	LayerNameRails = "rails"
+)
+
+//go:generate faux --interface BuildProcess --output fakes/build_process.go
+type BuildProcess interface {
 	Execute(workingDir string) error
 }
 
-func Build(
-	installProcess InstallProcess,
-	logger LogEmitter,
-	clock chronos.Clock,
-) packit.BuildFunc {
+func Build(buildProcess BuildProcess, logger LogEmitter, clock chronos.Clock) packit.BuildFunc {
 	return func(context packit.BuildContext) (packit.BuildResult, error) {
 		logger.Title("%s %s", context.BuildpackInfo.Name, context.BuildpackInfo.Version)
 
 		// TODO: Confirm these are needed
-		os.Setenv("PATH", fmt.Sprintf("%s:%s", os.Getenv("PATH"), filepath.Join(context.WorkingDir, "node_modules", ".bin")))
-		os.Setenv("PATH", fmt.Sprintf("%s:%s", os.Getenv("PATH"), filepath.Join(context.WorkingDir, "bin")))
+		// os.Setenv("PATH", fmt.Sprintf("%s:%s", os.Getenv("PATH"), filepath.Join(context.WorkingDir, "node_modules", ".bin")))
+		// os.Setenv("PATH", fmt.Sprintf("%s:%s", os.Getenv("PATH"), filepath.Join(context.WorkingDir, "bin")))
 
 		logger.Process("Executing build process")
 		duration, err := clock.Measure(func() error {
-			return installProcess.Execute(context.WorkingDir)
+			return buildProcess.Execute(context.WorkingDir)
 		})
 		if err != nil {
 			return packit.BuildResult{}, err
 		}
 
-		// envLayer, err := context.Layers.Get(LayerNameGems, packit.LaunchLayer, packit.CacheLayer)
-		// if err != nil {
-		// return packit.BuildResult{}, err
-		// }
+		railsLayer, err := context.Layers.Get(LayerNameRails, packit.LaunchLayer)
+		if err != nil {
+			return packit.BuildResult{}, err
+		}
+		railsLayer.LaunchEnv.Default("RAILS_ENV", "production")
 
 		logger.Action("Completed in %s", duration.Round(time.Millisecond))
 		logger.Break()
 
-		return packit.BuildResult{}, nil
+		return packit.BuildResult{
+			Layers: []packit.Layer{railsLayer},
+		}, nil
 	}
 }
