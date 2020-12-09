@@ -1,6 +1,7 @@
 package railsassets
 
 import (
+	"os"
 	"time"
 
 	"github.com/paketo-buildpacks/packit"
@@ -20,9 +21,7 @@ func Build(buildProcess BuildProcess, logger LogEmitter, clock chronos.Clock) pa
 	return func(context packit.BuildContext) (packit.BuildResult, error) {
 		logger.Title("%s %s", context.BuildpackInfo.Name, context.BuildpackInfo.Version)
 
-		// TODO: Confirm these are needed
-		// os.Setenv("PATH", fmt.Sprintf("%s:%s", os.Getenv("PATH"), filepath.Join(context.WorkingDir, "node_modules", ".bin")))
-		// os.Setenv("PATH", fmt.Sprintf("%s:%s", os.Getenv("PATH"), filepath.Join(context.WorkingDir, "bin")))
+		os.Setenv("RAILS_ENV", "production")
 
 		logger.Process("Executing build process")
 		duration, err := clock.Measure(func() error {
