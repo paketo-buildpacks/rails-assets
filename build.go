@@ -39,32 +39,38 @@ func Build(
 	return func(context packit.BuildContext) (packit.BuildResult, error) {
 		logger.Title("%s %s", context.BuildpackInfo.Name, context.BuildpackInfo.Version)
 
-		// entry := entries.Resolve(context.Plan.Entries)
+		entry := entries.Resolve(context.Plan.Entries)
 
 		railsLayer, err := context.Layers.Get(LayerNameRails)
 		if err != nil {
 			return packit.BuildResult{}, err
 		}
 
-		// Compiled assets are written to the location specified in config.assets.prefix, it defaults to public/assets directory
-		// What are files that would _change_ that can be used to detect if assets have changed?
 		var sum string
-		assetsDirectory := filepath.Join(context.WorkingDir, "public", "assets")
-		_, err = os.Stat(assetsDirectory)
+		assetsDir := filepath.Join(context.WorkingDir, "app", "assets")
+		_, err = os.Stat(assetsDir)
 		if err != nil {
 			if !os.IsNotExist(err) {
-				return packit.BuildResult{}, fmt.Errorf("failed to stat %s: %w", assetsDirectory, err)
+				return packit.BuildResult{}, fmt.Errorf("failed to stat %s: %w", assetsDir, err)
 			}
 		} else {
-			sum, err = calculator.Sum(assetsDirectory)
+			sum, err = calculator.Sum(assetsDir)
 			if err != nil {
 				return packit.BuildResult{}, err
 			}
 		}
 
 		cachedSHA, ok := railsLayer.Metadata["cache_sha"].(string)
-		if ok && cachedSHA != "" {
-			logger.Process("Using cached layer %s", railsLayer.Path)
+		if ok && cachedSHA != "" && cachedSHA == sum {
+			logger.Process("Reusing cached layer %s", railsLayer.Path)
+			logger.Break()
+
+			return packit.BuildResult{
+				Plan: packit.BuildpackPlan{
+					Entries: []packit.BuildpackPlanEntry{entry},
+				},
+				Layers: []packit.Layer{railsLayer},
+			}, nil
 		}
 
 		os.Setenv("RAILS_ENV", "production")
@@ -90,9 +96,9 @@ func Build(
 		}
 
 		return packit.BuildResult{
-			// Plan: packit.BuildpackPlan{
-			// Entries: []packit.BuildpackPlanEntry{entry},
-			// },
+			Plan: packit.BuildpackPlan{
+				Entries: []packit.BuildpackPlanEntry{entry},
+			},
 			Layers: []packit.Layer{railsLayer},
 		}, nil
 	}
