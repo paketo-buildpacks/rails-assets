@@ -60,19 +60,19 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 					{
 						Name: "gems",
 						Metadata: railsassets.BuildPlanMetadata{
-							Launch: true,
+							Build: true,
 						},
 					},
 					{
 						Name: "bundler",
 						Metadata: railsassets.BuildPlanMetadata{
-							Launch: true,
+							Build: true,
 						},
 					},
 					{
 						Name: "mri",
 						Metadata: railsassets.BuildPlanMetadata{
-							Launch: true,
+							Build: true,
 						},
 					},
 					{

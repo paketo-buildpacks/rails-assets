@@ -60,7 +60,7 @@ func testPrecompileProcess(t *testing.T, context spec.G, it spec.S) {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(executions).To(HaveLen(1))
-			Expect(executions[0].Args).To(Equal([]string{"exec", "rails", "assets:precompile"}))
+			Expect(executions[0].Args).To(Equal([]string{"exec", "rails", "assets:precompile", "assets:clean"}))
 		})
 
 		context("failure cases", func() {
