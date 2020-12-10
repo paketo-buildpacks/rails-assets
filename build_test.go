@@ -2,8 +2,10 @@ package railsassets_test
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -29,6 +31,8 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		clock chronos.Clock
 
 		installProcess *fakes.InstallProcess
+		calculator     *fakes.Calculator
+		entryResolver  *fakes.EntryResolver
 
 		build packit.BuildFunc
 	)
@@ -54,7 +58,12 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			return timeStamp
 		})
 
-		build = railsassets.Build(installProcess, logEmitter, clock)
+		calculator = &fakes.Calculator{}
+		calculator.SumCall.Returns.String = "some-calculator-sha"
+
+		entryResolver = &fakes.EntryResolver{}
+
+		build = railsassets.Build(installProcess, calculator, logEmitter, clock, entryResolver)
 	})
 
 	it.After(func() {
@@ -80,6 +89,36 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		Expect(buffer.String()).To(ContainSubstring("Some Buildpack some-version"))
 		Expect(buffer.String()).To(ContainSubstring("Executing build process"))
+	})
+
+	context("when checksum matches", func() {
+		it.Before(func() {
+			err := ioutil.WriteFile(filepath.Join(layersDir, fmt.Sprintf("%s.toml", railsassets.LayerNameRails)), []byte(fmt.Sprintf(`[metadata]
+			cache_sha = "some-calculator-sha"
+			built_at = "%s"
+			`, timeStamp.Format(time.RFC3339Nano))), 0600)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		it("reuses the cached layer", func() {
+			_, err := build(packit.BuildContext{
+				WorkingDir: workingDir,
+				CNBPath:    cnbDir,
+				Stack:      "some-stack",
+				BuildpackInfo: packit.BuildpackInfo{
+					Name:    "Some Buildpack",
+					Version: "some-version",
+				},
+				Layers: packit.Layers{Path: layersDir},
+			})
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(installProcess.ExecuteCall.CallCount).To(Equal(1))
+
+			Expect(buffer.String()).To(ContainSubstring("Some Buildpack some-version"))
+			Expect(buffer.String()).To(ContainSubstring("Reusing cached layer"))
+			Expect(buffer.String()).To(ContainSubstring("Executing build process"))
+		})
 	})
 
 	context("failure cases", func() {

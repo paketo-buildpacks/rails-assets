@@ -1,7 +1,9 @@
 package railsassets
 
 import (
+	"fmt"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/paketo-buildpacks/packit"
@@ -17,9 +19,53 @@ type BuildProcess interface {
 	Execute(workingDir string) error
 }
 
-func Build(buildProcess BuildProcess, logger LogEmitter, clock chronos.Clock) packit.BuildFunc {
+//go:generate faux --interface Calculator --output fakes/calculator.go
+type Calculator interface {
+	Sum(paths ...string) (string, error)
+}
+
+//go:generate faux --interface EntryResolver --output fakes/entry_resolver.go
+type EntryResolver interface {
+	Resolve([]packit.BuildpackPlanEntry) packit.BuildpackPlanEntry
+}
+
+func Build(
+	buildProcess BuildProcess,
+	calculator Calculator,
+	logger LogEmitter,
+	clock chronos.Clock,
+	entries EntryResolver,
+) packit.BuildFunc {
 	return func(context packit.BuildContext) (packit.BuildResult, error) {
 		logger.Title("%s %s", context.BuildpackInfo.Name, context.BuildpackInfo.Version)
+
+		// entry := entries.Resolve(context.Plan.Entries)
+
+		railsLayer, err := context.Layers.Get(LayerNameRails)
+		if err != nil {
+			return packit.BuildResult{}, err
+		}
+
+		// Compiled assets are written to the location specified in config.assets.prefix, it defaults to public/assets directory
+		// What are files that would _change_ that can be used to detect if assets have changed?
+		var sum string
+		assetsDirectory := filepath.Join(context.WorkingDir, "public", "assets")
+		_, err = os.Stat(assetsDirectory)
+		if err != nil {
+			if !os.IsNotExist(err) {
+				return packit.BuildResult{}, fmt.Errorf("failed to stat %s: %w", assetsDirectory, err)
+			}
+		} else {
+			sum, err = calculator.Sum(assetsDirectory)
+			if err != nil {
+				return packit.BuildResult{}, err
+			}
+		}
+
+		cachedSHA, ok := railsLayer.Metadata["cache_sha"].(string)
+		if ok && cachedSHA != "" {
+			logger.Process("Using cached layer %s", railsLayer.Path)
+		}
 
 		os.Setenv("RAILS_ENV", "production")
 
@@ -30,17 +76,23 @@ func Build(buildProcess BuildProcess, logger LogEmitter, clock chronos.Clock) pa
 		if err != nil {
 			return packit.BuildResult{}, err
 		}
-
-		railsLayer, err := context.Layers.Get(LayerNameRails, packit.LaunchLayer)
-		if err != nil {
-			return packit.BuildResult{}, err
-		}
-		railsLayer.LaunchEnv.Default("RAILS_ENV", "production")
-
 		logger.Action("Completed in %s", duration.Round(time.Millisecond))
 		logger.Break()
 
+		railsLayer.LaunchEnv.Default("RAILS_ENV", "production")
+
+		// railsLayer.Launch = entry.Metadata["launch"] == true
+		// railsLayer.Build = entry.Metadata["build"] == true
+		// railsLayer.Cache = entry.Metadata["build"] == true
+		railsLayer.Metadata = map[string]interface{}{
+			"built_at":  clock.Now().Format(time.RFC3339Nano),
+			"cache_sha": sum,
+		}
+
 		return packit.BuildResult{
+			// Plan: packit.BuildpackPlan{
+			// Entries: []packit.BuildpackPlanEntry{entry},
+			// },
 			Layers: []packit.Layer{railsLayer},
 		}, nil
 	}

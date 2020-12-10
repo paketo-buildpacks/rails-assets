@@ -76,7 +76,7 @@ func TestIntegration(t *testing.T) {
 	buildpackStore := occam.NewBuildpackStore()
 
 	settings.Buildpacks.RailsAssets.Online, err = buildpackStore.Get.
-		WithVersion("1.2.3").
+		WithVersion("0.0.1").
 		Execute(root)
 	Expect(err).NotTo(HaveOccurred())
 
