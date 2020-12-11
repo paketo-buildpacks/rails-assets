@@ -32,7 +32,6 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		installProcess *fakes.InstallProcess
 		calculator     *fakes.Calculator
-		entryResolver  *fakes.EntryResolver
 
 		build packit.BuildFunc
 	)
@@ -61,9 +60,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		calculator = &fakes.Calculator{}
 		calculator.SumCall.Returns.String = "some-calculator-sha"
 
-		entryResolver = &fakes.EntryResolver{}
-
-		build = railsassets.Build(installProcess, calculator, logEmitter, clock, entryResolver)
+		build = railsassets.Build(installProcess, calculator, logEmitter, clock)
 	})
 
 	it.After(func() {
@@ -92,12 +89,21 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 	})
 
 	context("when checksum matches", func() {
+		var assetsDir string
 		it.Before(func() {
-			err := ioutil.WriteFile(filepath.Join(layersDir, fmt.Sprintf("%s.toml", railsassets.LayerNameRails)), []byte(fmt.Sprintf(`[metadata]
+			err := ioutil.WriteFile(filepath.Join(layersDir, fmt.Sprintf("%s.toml", railsassets.LayerNameAssets)), []byte(fmt.Sprintf(`[metadata]
 			cache_sha = "some-calculator-sha"
 			built_at = "%s"
 			`, timeStamp.Format(time.RFC3339Nano))), 0600)
 			Expect(err).NotTo(HaveOccurred())
+
+			assetsDir := filepath.Join(workingDir, "app", "assets")
+			err = os.MkdirAll(assetsDir, os.ModePerm)
+			Expect(err).NotTo(HaveOccurred())
+			calculator.SumCall.Returns.String = "some-calculator-sha"
+		})
+		it.After(func() {
+			Expect(os.RemoveAll(assetsDir)).To(Succeed())
 		})
 
 		it("reuses the cached layer", func() {
@@ -113,11 +119,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(installProcess.ExecuteCall.CallCount).To(Equal(1))
+			Expect(installProcess.ExecuteCall.CallCount).To(Equal(0))
 
 			Expect(buffer.String()).To(ContainSubstring("Some Buildpack some-version"))
 			Expect(buffer.String()).To(ContainSubstring("Reusing cached layer"))
-			Expect(buffer.String()).To(ContainSubstring("Executing build process"))
 		})
 	})
 

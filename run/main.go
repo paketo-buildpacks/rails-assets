@@ -23,7 +23,6 @@ func main() {
 			fs.NewChecksumCalculator(),
 			logEmitter,
 			chronos.DefaultClock,
-			railsassets.NewPlanEntryResolver(),
 		),
 	)
 }
