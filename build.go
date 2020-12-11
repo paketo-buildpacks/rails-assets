@@ -42,9 +42,7 @@ func Build(
 		assetsDir := filepath.Join(context.WorkingDir, "app", "assets")
 		_, err = os.Stat(assetsDir)
 		if err != nil {
-			if !os.IsNotExist(err) {
-				return packit.BuildResult{}, fmt.Errorf("failed to stat %s: %w", assetsDir, err)
-			}
+			return packit.BuildResult{}, fmt.Errorf("failed to stat %s: %w", assetsDir, err)
 		} else {
 			sum, err = calculator.Sum(assetsDir)
 			if err != nil {
@@ -62,35 +60,6 @@ func Build(
 			}, nil
 		}
 
-		publicAssetsDir := filepath.Join("public", "assets")
-		tmpAssetsCacheDir := filepath.Join("tmp", "assets", "cache")
-
-		layerPublicAssets := filepath.Join(assetsLayer.Path, publicAssetsDir)
-		_, err = os.Stat(layerPublicAssets)
-		if err != nil {
-			if !os.IsNotExist(err) {
-				return packit.BuildResult{}, fmt.Errorf("failed to stat %s: %w", layerPublicAssets, err)
-			}
-		} else {
-			err = os.Symlink(layerPublicAssets, filepath.Join(context.WorkingDir, publicAssetsDir))
-			if err != nil {
-				return packit.BuildResult{}, fmt.Errorf("failed to symlink public/assets into working directory: %w", err)
-			}
-		}
-
-		layerTmpAssetsCache := filepath.Join(assetsLayer.Path, tmpAssetsCacheDir)
-		_, err = os.Stat(layerTmpAssetsCache)
-		if err != nil {
-			if !os.IsNotExist(err) {
-				return packit.BuildResult{}, fmt.Errorf("failed to stat %s: %w", layerTmpAssetsCache, err)
-			}
-		} else {
-			err = os.Symlink(filepath.Join(layerTmpAssetsCache), filepath.Join(context.WorkingDir, tmpAssetsCacheDir))
-			if err != nil {
-				return packit.BuildResult{}, fmt.Errorf("failed to symlink tmp/assets/cache into working directory: %w", err)
-			}
-		}
-
 		os.Setenv("RAILS_ENV", "production")
 
 		logger.Process("Executing build process")
@@ -102,6 +71,19 @@ func Build(
 		}
 		logger.Action("Completed in %s", duration.Round(time.Millisecond))
 		logger.Break()
+
+		publicAssetsDir := filepath.Join("public", "assets")
+		tmpAssetsCacheDir := filepath.Join("tmp", "assets", "cache")
+
+		err = os.Symlink(filepath.Join(assetsLayer.Path, publicAssetsDir), filepath.Join(context.WorkingDir, publicAssetsDir))
+		if err != nil {
+			return packit.BuildResult{}, fmt.Errorf("failed to symlink public/assets into working directory: %w", err)
+		}
+
+		err = os.Symlink(filepath.Join(assetsLayer.Path, tmpAssetsCacheDir), filepath.Join(context.WorkingDir, tmpAssetsCacheDir))
+		if err != nil {
+			return packit.BuildResult{}, fmt.Errorf("failed to symlink tmp/assets/cache into working directory: %w", err)
+		}
 
 		assetsLayer.Launch = true
 		assetsLayer.LaunchEnv.Default("RAILS_ENV", "production")
