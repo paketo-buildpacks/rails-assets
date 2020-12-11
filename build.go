@@ -41,7 +41,7 @@ func Build(
 
 		entry := entries.Resolve(context.Plan.Entries)
 
-		railsLayer, err := context.Layers.Get(LayerNameRails)
+		assetsLayer, err := context.Layers.Get(LayerNameRails)
 		if err != nil {
 			return packit.BuildResult{}, err
 		}
@@ -60,17 +60,27 @@ func Build(
 			}
 		}
 
-		cachedSHA, ok := railsLayer.Metadata["cache_sha"].(string)
+		cachedSHA, ok := assetsLayer.Metadata["cache_sha"].(string)
 		if ok && cachedSHA != "" && cachedSHA == sum {
-			logger.Process("Reusing cached layer %s", railsLayer.Path)
+			logger.Process("Reusing cached layer %s", assetsLayer.Path)
 			logger.Break()
 
 			return packit.BuildResult{
 				Plan: packit.BuildpackPlan{
 					Entries: []packit.BuildpackPlanEntry{entry},
 				},
-				Layers: []packit.Layer{railsLayer},
+				Layers: []packit.Layer{assetsLayer},
 			}, nil
+		}
+
+		// Unable to reuse cache layer, so bring back public/assets & tmp/assets/cache for the bundle command
+		err = os.Symlink(filepath.Join(assetsLayer.Path, "public", "assets"), filepath.Join(context.WorkingDir, "public", "assets"))
+		if err != nil {
+			return packit.BuildResult{}, fmt.Errorf("failed to symlink public/assets into working directory: %w", err)
+		}
+		err = os.Symlink(filepath.Join(assetsLayer.Path, "tmp", "assets", "cache"), filepath.Join(context.WorkingDir, "tmp", "assets", "cache"))
+		if err != nil {
+			return packit.BuildResult{}, fmt.Errorf("failed to symlink tmp/assets/cache into working directory: %w", err)
 		}
 
 		os.Setenv("RAILS_ENV", "production")
@@ -85,12 +95,12 @@ func Build(
 		logger.Action("Completed in %s", duration.Round(time.Millisecond))
 		logger.Break()
 
-		railsLayer.LaunchEnv.Default("RAILS_ENV", "production")
+		assetsLayer.LaunchEnv.Default("RAILS_ENV", "production")
 
-		// railsLayer.Launch = entry.Metadata["launch"] == true
-		// railsLayer.Build = entry.Metadata["build"] == true
-		// railsLayer.Cache = entry.Metadata["build"] == true
-		railsLayer.Metadata = map[string]interface{}{
+		// assetsLayer.Launch = entry.Metadata["launch"] == true
+		// assetsLayer.Build = entry.Metadata["build"] == true
+		// assetsLayer.Cache = entry.Metadata["build"] == true
+		assetsLayer.Metadata = map[string]interface{}{
 			"built_at":  clock.Now().Format(time.RFC3339Nano),
 			"cache_sha": sum,
 		}
@@ -99,7 +109,7 @@ func Build(
 			Plan: packit.BuildpackPlan{
 				Entries: []packit.BuildpackPlanEntry{entry},
 			},
-			Layers: []packit.Layer{railsLayer},
+			Layers: []packit.Layer{assetsLayer},
 		}, nil
 	}
 }
