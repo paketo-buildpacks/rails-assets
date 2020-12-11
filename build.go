@@ -103,6 +103,7 @@ func Build(
 		logger.Action("Completed in %s", duration.Round(time.Millisecond))
 		logger.Break()
 
+		assetsLayer.Launch = true
 		assetsLayer.LaunchEnv.Default("RAILS_ENV", "production")
 
 		assetsLayer.Metadata = map[string]interface{}{
