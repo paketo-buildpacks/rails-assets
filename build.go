@@ -62,27 +62,30 @@ func Build(
 			}, nil
 		}
 
-		layerPublicAssets := filepath.Join(assetsLayer.Path, "public", "assets")
+		publicAssetsDir := filepath.Join("public", "assets")
+		tmpAssetsCacheDir := filepath.Join("tmp", "assets", "cache")
+
+		layerPublicAssets := filepath.Join(assetsLayer.Path, publicAssetsDir)
 		_, err = os.Stat(layerPublicAssets)
 		if err != nil {
 			if !os.IsNotExist(err) {
 				return packit.BuildResult{}, fmt.Errorf("failed to stat %s: %w", layerPublicAssets, err)
 			}
 		} else {
-			err = os.Symlink(layerPublicAssets, filepath.Join(context.WorkingDir, "public", "assets"))
+			err = os.Symlink(layerPublicAssets, filepath.Join(context.WorkingDir, publicAssetsDir))
 			if err != nil {
 				return packit.BuildResult{}, fmt.Errorf("failed to symlink public/assets into working directory: %w", err)
 			}
 		}
 
-		layerTmpAssetsCache := filepath.Join(assetsLayer.Path, "tmp", "assets", "cache")
+		layerTmpAssetsCache := filepath.Join(assetsLayer.Path, tmpAssetsCacheDir)
 		_, err = os.Stat(layerTmpAssetsCache)
 		if err != nil {
 			if !os.IsNotExist(err) {
 				return packit.BuildResult{}, fmt.Errorf("failed to stat %s: %w", layerTmpAssetsCache, err)
 			}
 		} else {
-			err = os.Symlink(filepath.Join(assetsLayer.Path, "tmp", "assets", "cache"), filepath.Join(context.WorkingDir, "tmp", "assets", "cache"))
+			err = os.Symlink(filepath.Join(layerTmpAssetsCache), filepath.Join(context.WorkingDir, tmpAssetsCacheDir))
 			if err != nil {
 				return packit.BuildResult{}, fmt.Errorf("failed to symlink tmp/assets/cache into working directory: %w", err)
 			}
