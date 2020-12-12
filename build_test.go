@@ -47,6 +47,15 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		workingDir, err = ioutil.TempDir("", "working-dir")
 		Expect(err).NotTo(HaveOccurred())
 
+		err = os.MkdirAll(filepath.Join(workingDir, "app", "assets"), os.ModePerm)
+		Expect(err).NotTo(HaveOccurred())
+
+		err = os.MkdirAll(filepath.Join(workingDir, "public", "assets"), os.ModePerm)
+		Expect(err).NotTo(HaveOccurred())
+
+		err = os.MkdirAll(filepath.Join(workingDir, "tmp", "assets", "cache"), os.ModePerm)
+		Expect(err).NotTo(HaveOccurred())
+
 		installProcess = &fakes.InstallProcess{}
 
 		buffer = bytes.NewBuffer(nil)
@@ -89,7 +98,6 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 	})
 
 	context("when checksum matches", func() {
-		var assetsDir string
 		it.Before(func() {
 			err := ioutil.WriteFile(filepath.Join(layersDir, fmt.Sprintf("%s.toml", railsassets.LayerNameAssets)), []byte(fmt.Sprintf(`[metadata]
 			cache_sha = "some-calculator-sha"
@@ -97,13 +105,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			`, timeStamp.Format(time.RFC3339Nano))), 0600)
 			Expect(err).NotTo(HaveOccurred())
 
-			assetsDir := filepath.Join(workingDir, "app", "assets")
-			err = os.MkdirAll(assetsDir, os.ModePerm)
-			Expect(err).NotTo(HaveOccurred())
 			calculator.SumCall.Returns.String = "some-calculator-sha"
-		})
-		it.After(func() {
-			Expect(os.RemoveAll(assetsDir)).To(Succeed())
 		})
 
 		it("reuses the cached layer", func() {

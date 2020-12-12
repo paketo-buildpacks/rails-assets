@@ -1,7 +1,6 @@
 package railsassets
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"time"
@@ -38,16 +37,50 @@ func Build(
 			return packit.BuildResult{}, err
 		}
 
-		var sum string
-		assetsDir := filepath.Join(context.WorkingDir, "app", "assets")
-		_, err = os.Stat(assetsDir)
+		err = os.RemoveAll(filepath.Join(context.WorkingDir, "public", "assets"))
 		if err != nil {
-			return packit.BuildResult{}, fmt.Errorf("failed to stat %s: %w", assetsDir, err)
-		} else {
-			sum, err = calculator.Sum(assetsDir)
-			if err != nil {
-				return packit.BuildResult{}, err
-			}
+			return packit.BuildResult{}, err
+		}
+
+		err = os.MkdirAll(filepath.Join(context.WorkingDir, "public"), os.ModePerm)
+		if err != nil {
+			return packit.BuildResult{}, err
+		}
+
+		err = os.RemoveAll(filepath.Join(context.WorkingDir, "tmp", "cache", "assets"))
+		if err != nil {
+			return packit.BuildResult{}, err
+		}
+
+		err = os.MkdirAll(filepath.Join(context.WorkingDir, "tmp", "cache"), os.ModePerm)
+		if err != nil {
+			return packit.BuildResult{}, err
+		}
+
+		err = os.MkdirAll(filepath.Join(assetsLayer.Path, "public-assets"), os.ModePerm)
+		if err != nil {
+			return packit.BuildResult{}, err
+		}
+
+		err = os.Symlink(filepath.Join(assetsLayer.Path, "public-assets"), filepath.Join(context.WorkingDir, "public", "assets"))
+		if err != nil {
+			return packit.BuildResult{}, err
+		}
+
+		err = os.MkdirAll(filepath.Join(assetsLayer.Path, "tmp-cache-assets"), os.ModePerm)
+		if err != nil {
+			return packit.BuildResult{}, err
+		}
+
+		err = os.Symlink(filepath.Join(assetsLayer.Path, "tmp-cache-assets"), filepath.Join(context.WorkingDir, "tmp", "cache", "assets"))
+		if err != nil {
+			return packit.BuildResult{}, err
+		}
+
+		assetsDir := filepath.Join(context.WorkingDir, "app", "assets")
+		sum, err := calculator.Sum(assetsDir)
+		if err != nil {
+			return packit.BuildResult{}, err
 		}
 
 		cachedSHA, ok := assetsLayer.Metadata["cache_sha"].(string)
@@ -71,19 +104,6 @@ func Build(
 		}
 		logger.Action("Completed in %s", duration.Round(time.Millisecond))
 		logger.Break()
-
-		publicAssetsDir := filepath.Join("public", "assets")
-		tmpAssetsCacheDir := filepath.Join("tmp", "assets", "cache")
-
-		err = os.Symlink(filepath.Join(assetsLayer.Path, publicAssetsDir), filepath.Join(context.WorkingDir, publicAssetsDir))
-		if err != nil {
-			return packit.BuildResult{}, fmt.Errorf("failed to symlink public/assets into working directory: %w", err)
-		}
-
-		err = os.Symlink(filepath.Join(assetsLayer.Path, tmpAssetsCacheDir), filepath.Join(context.WorkingDir, tmpAssetsCacheDir))
-		if err != nil {
-			return packit.BuildResult{}, fmt.Errorf("failed to symlink tmp/assets/cache into working directory: %w", err)
-		}
 
 		assetsLayer.Launch = true
 		assetsLayer.LaunchEnv.Default("RAILS_ENV", "production")
