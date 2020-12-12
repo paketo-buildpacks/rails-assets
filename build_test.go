@@ -31,7 +31,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		clock chronos.Clock
 
-		installProcess   *fakes.InstallProcess
+		buildProcess     *fakes.BuildProcess
 		calculator       *fakes.Calculator
 		environmentSetup *fakes.EnvironmentSetup
 
@@ -58,7 +58,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		err = os.MkdirAll(filepath.Join(workingDir, "tmp", "assets", "cache"), os.ModePerm)
 		Expect(err).NotTo(HaveOccurred())
 
-		installProcess = &fakes.InstallProcess{}
+		buildProcess = &fakes.BuildProcess{}
 
 		buffer = bytes.NewBuffer(nil)
 		logEmitter := railsassets.NewLogEmitter(buffer)
@@ -73,7 +73,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		environmentSetup = &fakes.EnvironmentSetup{}
 
-		build = railsassets.Build(installProcess, calculator, environmentSetup, logEmitter, clock)
+		build = railsassets.Build(buildProcess, calculator, environmentSetup, logEmitter, clock)
 	})
 
 	it.After(func() {
@@ -94,8 +94,8 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		})
 		Expect(err).NotTo(HaveOccurred())
 
-		Expect(installProcess.ExecuteCall.CallCount).To(Equal(1))
-		Expect(installProcess.ExecuteCall.Receives.WorkingDir).To(Equal(workingDir))
+		Expect(buildProcess.ExecuteCall.CallCount).To(Equal(1))
+		Expect(buildProcess.ExecuteCall.Receives.WorkingDir).To(Equal(workingDir))
 
 		Expect(buffer.String()).To(ContainSubstring("Some Buildpack some-version"))
 		Expect(buffer.String()).To(ContainSubstring("Executing build process"))
@@ -125,7 +125,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(installProcess.ExecuteCall.CallCount).To(Equal(0))
+			Expect(buildProcess.ExecuteCall.CallCount).To(Equal(0))
 
 			Expect(buffer.String()).To(ContainSubstring("Some Buildpack some-version"))
 			Expect(buffer.String()).To(ContainSubstring("Reusing cached layer"))
@@ -157,7 +157,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		context("when precompile process fails", func() {
 			it.Before(func() {
-				installProcess.ExecuteCall.Returns.Error = errors.New("some-error")
+				buildProcess.ExecuteCall.Returns.Error = errors.New("some-error")
 			})
 
 			it("returns the error", func() {
