@@ -11,5 +11,8 @@ func TestUnitRails(t *testing.T) {
 	suite := spec.New("rails", spec.Report(report.Terminal{}))
 	suite("Build", testBuild)
 	suite("Detect", testDetect)
+	suite("PrecompleProcess", testPrecompileProcess)
+	suite("GemfileParser", testGemfileParser)
+	suite("DirectoriesSetup", testDirectoriesSetup)
 	suite.Run(t)
 }

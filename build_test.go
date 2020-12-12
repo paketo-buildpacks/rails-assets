@@ -2,6 +2,7 @@ package railsassets_test
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -30,8 +31,9 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		clock chronos.Clock
 
-		installProcess *fakes.InstallProcess
-		calculator     *fakes.Calculator
+		installProcess   *fakes.InstallProcess
+		calculator       *fakes.Calculator
+		environmentSetup *fakes.EnvironmentSetup
 
 		build packit.BuildFunc
 	)
@@ -69,7 +71,9 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		calculator = &fakes.Calculator{}
 		calculator.SumCall.Returns.String = "some-calculator-sha"
 
-		build = railsassets.Build(installProcess, calculator, logEmitter, clock)
+		environmentSetup = &fakes.EnvironmentSetup{}
+
+		build = railsassets.Build(installProcess, calculator, environmentSetup, logEmitter, clock)
 	})
 
 	it.After(func() {
@@ -129,6 +133,37 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 	})
 
 	context("failure cases", func() {
-		// TODO
+		context("when environment setup fails", func() {
+			it.Before(func() {
+				environmentSetup.RunCall.Returns.Error = errors.New("some-error")
+			})
+
+			it("returns the error", func() {
+				_, err := build(packit.BuildContext{})
+				Expect(err).To(MatchError("failed to setup environment: some-error"))
+			})
+		})
+
+		context("when calculator sum fails", func() {
+			it.Before(func() {
+				calculator.SumCall.Returns.Error = errors.New("some-error")
+			})
+
+			it("returns the error", func() {
+				_, err := build(packit.BuildContext{})
+				Expect(err).To(MatchError("some-error"))
+			})
+		})
+
+		context("when precompile process fails", func() {
+			it.Before(func() {
+				installProcess.ExecuteCall.Returns.Error = errors.New("some-error")
+			})
+
+			it("returns the error", func() {
+				_, err := build(packit.BuildContext{})
+				Expect(err).To(MatchError("some-error"))
+			})
+		})
 	})
 }

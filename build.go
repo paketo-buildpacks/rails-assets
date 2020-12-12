@@ -1,6 +1,7 @@
 package railsassets
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"time"
@@ -23,9 +24,15 @@ type Calculator interface {
 	Sum(paths ...string) (string, error)
 }
 
+//go:generate faux --interface EnvironmentSetup --output fakes/environment_setup.go
+type EnvironmentSetup interface {
+	Run(layerPath, workingDir string) error
+}
+
 func Build(
 	buildProcess BuildProcess,
 	calculator Calculator,
+	environmentSetup EnvironmentSetup,
 	logger LogEmitter,
 	clock chronos.Clock,
 ) packit.BuildFunc {
@@ -37,44 +44,9 @@ func Build(
 			return packit.BuildResult{}, err
 		}
 
-		err = os.RemoveAll(filepath.Join(context.WorkingDir, "public", "assets"))
+		err = environmentSetup.Run(assetsLayer.Path, context.WorkingDir)
 		if err != nil {
-			return packit.BuildResult{}, err
-		}
-
-		err = os.MkdirAll(filepath.Join(context.WorkingDir, "public"), os.ModePerm)
-		if err != nil {
-			return packit.BuildResult{}, err
-		}
-
-		err = os.RemoveAll(filepath.Join(context.WorkingDir, "tmp", "cache", "assets"))
-		if err != nil {
-			return packit.BuildResult{}, err
-		}
-
-		err = os.MkdirAll(filepath.Join(context.WorkingDir, "tmp", "cache"), os.ModePerm)
-		if err != nil {
-			return packit.BuildResult{}, err
-		}
-
-		err = os.MkdirAll(filepath.Join(assetsLayer.Path, "public-assets"), os.ModePerm)
-		if err != nil {
-			return packit.BuildResult{}, err
-		}
-
-		err = os.Symlink(filepath.Join(assetsLayer.Path, "public-assets"), filepath.Join(context.WorkingDir, "public", "assets"))
-		if err != nil {
-			return packit.BuildResult{}, err
-		}
-
-		err = os.MkdirAll(filepath.Join(assetsLayer.Path, "tmp-cache-assets"), os.ModePerm)
-		if err != nil {
-			return packit.BuildResult{}, err
-		}
-
-		err = os.Symlink(filepath.Join(assetsLayer.Path, "tmp-cache-assets"), filepath.Join(context.WorkingDir, "tmp", "cache", "assets"))
-		if err != nil {
-			return packit.BuildResult{}, err
+			return packit.BuildResult{}, fmt.Errorf("failed to setup environment: %w", err)
 		}
 
 		assetsDir := filepath.Join(context.WorkingDir, "app", "assets")
