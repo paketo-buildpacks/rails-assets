@@ -44,11 +44,6 @@ func Build(
 			return packit.BuildResult{}, err
 		}
 
-		err = environmentSetup.Run(assetsLayer.Path, context.WorkingDir)
-		if err != nil {
-			return packit.BuildResult{}, fmt.Errorf("failed to setup environment: %w", err)
-		}
-
 		assetsDir := filepath.Join(context.WorkingDir, "app", "assets")
 		sum, err := calculator.Sum(assetsDir)
 		if err != nil {
@@ -63,6 +58,11 @@ func Build(
 			return packit.BuildResult{
 				Layers: []packit.Layer{assetsLayer},
 			}, nil
+		}
+
+		err = environmentSetup.Run(assetsLayer.Path, context.WorkingDir)
+		if err != nil {
+			return packit.BuildResult{}, fmt.Errorf("failed to setup environment: %w", err)
 		}
 
 		os.Setenv("RAILS_ENV", "production")
