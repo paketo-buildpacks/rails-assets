@@ -13,6 +13,6 @@ func TestUnitRails(t *testing.T) {
 	suite("Detect", testDetect)
 	suite("PrecompleProcess", testPrecompileProcess)
 	suite("GemfileParser", testGemfileParser)
-	suite("DirectoriesSetup", testDirectoriesSetup)
+	suite("DirectorySetup", testDirectorySetup)
 	suite.Run(t)
 }
