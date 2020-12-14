@@ -2,8 +2,11 @@ package railsassets_test
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -28,7 +31,9 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		clock chronos.Clock
 
-		installProcess *fakes.InstallProcess
+		buildProcess     *fakes.BuildProcess
+		calculator       *fakes.Calculator
+		environmentSetup *fakes.EnvironmentSetup
 
 		build packit.BuildFunc
 	)
@@ -44,7 +49,16 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		workingDir, err = ioutil.TempDir("", "working-dir")
 		Expect(err).NotTo(HaveOccurred())
 
-		installProcess = &fakes.InstallProcess{}
+		err = os.MkdirAll(filepath.Join(workingDir, "app", "assets"), os.ModePerm)
+		Expect(err).NotTo(HaveOccurred())
+
+		err = os.MkdirAll(filepath.Join(workingDir, "public", "assets"), os.ModePerm)
+		Expect(err).NotTo(HaveOccurred())
+
+		err = os.MkdirAll(filepath.Join(workingDir, "tmp", "assets", "cache"), os.ModePerm)
+		Expect(err).NotTo(HaveOccurred())
+
+		buildProcess = &fakes.BuildProcess{}
 
 		buffer = bytes.NewBuffer(nil)
 		logEmitter := railsassets.NewLogEmitter(buffer)
@@ -54,7 +68,12 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			return timeStamp
 		})
 
-		build = railsassets.Build(installProcess, logEmitter, clock)
+		calculator = &fakes.Calculator{}
+		calculator.SumCall.Returns.String = "some-calculator-sha"
+
+		environmentSetup = &fakes.EnvironmentSetup{}
+
+		build = railsassets.Build(buildProcess, calculator, environmentSetup, logEmitter, clock)
 	})
 
 	it.After(func() {
@@ -75,14 +94,100 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		})
 		Expect(err).NotTo(HaveOccurred())
 
-		Expect(installProcess.ExecuteCall.CallCount).To(Equal(1))
-		Expect(installProcess.ExecuteCall.Receives.WorkingDir).To(Equal(workingDir))
+		Expect(buildProcess.ExecuteCall.CallCount).To(Equal(1))
+		Expect(buildProcess.ExecuteCall.Receives.WorkingDir).To(Equal(workingDir))
 
 		Expect(buffer.String()).To(ContainSubstring("Some Buildpack some-version"))
 		Expect(buffer.String()).To(ContainSubstring("Executing build process"))
 	})
 
+	context("when checksum matches", func() {
+		it.Before(func() {
+			err := ioutil.WriteFile(filepath.Join(layersDir, fmt.Sprintf("%s.toml", railsassets.LayerNameAssets)), []byte(fmt.Sprintf(`[metadata]
+			cache_sha = "some-calculator-sha"
+			built_at = "%s"
+			`, timeStamp.Format(time.RFC3339Nano))), 0600)
+			Expect(err).NotTo(HaveOccurred())
+
+			calculator.SumCall.Returns.String = "some-calculator-sha"
+		})
+
+		it("reuses the cached layer", func() {
+			_, err := build(packit.BuildContext{
+				WorkingDir: workingDir,
+				CNBPath:    cnbDir,
+				Stack:      "some-stack",
+				BuildpackInfo: packit.BuildpackInfo{
+					Name:    "Some Buildpack",
+					Version: "some-version",
+				},
+				Layers: packit.Layers{Path: layersDir},
+			})
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(buildProcess.ExecuteCall.CallCount).To(Equal(0))
+
+			Expect(buffer.String()).To(ContainSubstring("Some Buildpack some-version"))
+			Expect(buffer.String()).To(ContainSubstring("Reusing cached layer"))
+		})
+
+		context("failure cases", func() {
+			context("when environment linking fails", func() {
+				it.Before(func() {
+					environmentSetup.LinkCall.Returns.Error = errors.New("some-error")
+				})
+
+				it("returns the error", func() {
+					_, err := build(packit.BuildContext{})
+					Expect(err).To(MatchError("some-error"))
+				})
+			})
+		})
+	})
+
 	context("failure cases", func() {
-		// TODO
+		context("when environment setup fails", func() {
+			it.Before(func() {
+				environmentSetup.ResetLocalCall.Returns.Error = errors.New("some-error")
+			})
+
+			it("returns the error", func() {
+				_, err := build(packit.BuildContext{})
+				Expect(err).To(MatchError("some-error"))
+			})
+		})
+
+		context("when calculator sum fails", func() {
+			it.Before(func() {
+				calculator.SumCall.Returns.Error = errors.New("some-error")
+			})
+
+			it("returns the error", func() {
+				_, err := build(packit.BuildContext{})
+				Expect(err).To(MatchError("some-error"))
+			})
+		})
+
+		context("when reset layer fails", func() {
+			it.Before(func() {
+				environmentSetup.ResetLayerCall.Returns.Error = errors.New("some-error")
+			})
+
+			it("returns the error", func() {
+				_, err := build(packit.BuildContext{})
+				Expect(err).To(MatchError("some-error"))
+			})
+		})
+
+		context("when precompile process fails", func() {
+			it.Before(func() {
+				buildProcess.ExecuteCall.Returns.Error = errors.New("some-error")
+			})
+
+			it("returns the error", func() {
+				_, err := build(packit.BuildContext{})
+				Expect(err).To(MatchError("some-error"))
+			})
+		})
 	})
 }

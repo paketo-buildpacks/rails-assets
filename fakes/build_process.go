@@ -2,7 +2,7 @@ package fakes
 
 import "sync"
 
-type InstallProcess struct {
+type BuildProcess struct {
 	ExecuteCall struct {
 		sync.Mutex
 		CallCount int
@@ -16,7 +16,7 @@ type InstallProcess struct {
 	}
 }
 
-func (f *InstallProcess) Execute(param1 string) error {
+func (f *BuildProcess) Execute(param1 string) error {
 	f.ExecuteCall.Lock()
 	defer f.ExecuteCall.Unlock()
 	f.ExecuteCall.CallCount++

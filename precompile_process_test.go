@@ -66,7 +66,9 @@ func testPrecompileProcess(t *testing.T, context spec.G, it spec.S) {
 		context("failure cases", func() {
 			context("when bundle exec fails", func() {
 				it.Before(func() {
-					executable.ExecuteCall.Returns.Error = errors.New("bundle exec failed")
+					executable.ExecuteCall.Stub = func(execution pexec.Execution) error {
+						return errors.New("bundle exec failed")
+					}
 				})
 				it("prints the execution output and returns an error", func() {
 					err := precompileProcess.Execute(workingDir)

@@ -5,6 +5,7 @@ import (
 
 	"github.com/paketo-buildpacks/packit"
 	"github.com/paketo-buildpacks/packit/chronos"
+	"github.com/paketo-buildpacks/packit/fs"
 	"github.com/paketo-buildpacks/packit/pexec"
 	railsassets "github.com/paketo-buildpacks/rails-assets"
 )
@@ -19,6 +20,8 @@ func main() {
 				pexec.NewExecutable("bundle"),
 				logEmitter,
 			),
+			fs.NewChecksumCalculator(),
+			railsassets.NewDirectorySetup(),
 			logEmitter,
 			chronos.DefaultClock,
 		),
