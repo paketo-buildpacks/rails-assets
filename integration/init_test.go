@@ -76,7 +76,7 @@ func TestIntegration(t *testing.T) {
 	buildpackStore := occam.NewBuildpackStore()
 
 	settings.Buildpacks.RailsAssets.Online, err = buildpackStore.Get.
-		WithVersion("0.0.1").
+		WithVersion("1.2.3").
 		Execute(root)
 	Expect(err).NotTo(HaveOccurred())
 
@@ -108,5 +108,6 @@ func TestIntegration(t *testing.T) {
 
 	suite := spec.New("Integration", spec.Parallel(), spec.Report(report.Terminal{}))
 	suite("DefaultApp", testDefaultApp)
+	suite("Caching", testCaching)
 	suite.Run(t)
 }
