@@ -130,23 +130,47 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			Expect(buffer.String()).To(ContainSubstring("Some Buildpack some-version"))
 			Expect(buffer.String()).To(ContainSubstring("Reusing cached layer"))
 		})
+
+		context("failure cases", func() {
+			context("when environment linking fails", func() {
+				it.Before(func() {
+					environmentSetup.LinkCall.Returns.Error = errors.New("some-error")
+				})
+
+				it("returns the error", func() {
+					_, err := build(packit.BuildContext{})
+					Expect(err).To(MatchError("some-error"))
+				})
+			})
+		})
 	})
 
 	context("failure cases", func() {
 		context("when environment setup fails", func() {
 			it.Before(func() {
-				environmentSetup.RunCall.Returns.Error = errors.New("some-error")
+				environmentSetup.ResetLocalCall.Returns.Error = errors.New("some-error")
 			})
 
 			it("returns the error", func() {
 				_, err := build(packit.BuildContext{})
-				Expect(err).To(MatchError("failed to setup environment: some-error"))
+				Expect(err).To(MatchError("some-error"))
 			})
 		})
 
 		context("when calculator sum fails", func() {
 			it.Before(func() {
 				calculator.SumCall.Returns.Error = errors.New("some-error")
+			})
+
+			it("returns the error", func() {
+				_, err := build(packit.BuildContext{})
+				Expect(err).To(MatchError("some-error"))
+			})
+		})
+
+		context("when reset layer fails", func() {
+			it.Before(func() {
+				environmentSetup.ResetLayerCall.Returns.Error = errors.New("some-error")
 			})
 
 			it("returns the error", func() {

@@ -1,7 +1,6 @@
 package railsassets
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"time"
@@ -26,7 +25,9 @@ type Calculator interface {
 
 //go:generate faux --interface EnvironmentSetup --output fakes/environment_setup.go
 type EnvironmentSetup interface {
-	Run(layerPath, workingDir string) error
+	ResetLocal(workingDir string) error
+	ResetLayer(layerPath string) error
+	Link(layerPath, workingDir string) error
 }
 
 func Build(
@@ -44,25 +45,40 @@ func Build(
 			return packit.BuildResult{}, err
 		}
 
-		assetsDir := filepath.Join(context.WorkingDir, "app", "assets")
-		sum, err := calculator.Sum(assetsDir)
+		appAssetsDir := filepath.Join(context.WorkingDir, "app", "assets")
+		sum, err := calculator.Sum(appAssetsDir)
 		if err != nil {
 			return packit.BuildResult{}, err
 		}
 
-		cachedSHA, ok := assetsLayer.Metadata["cache_sha"].(string)
-		if ok && cachedSHA != "" && cachedSHA == sum {
+		err = environmentSetup.ResetLocal(context.WorkingDir)
+		if err != nil {
+			return packit.BuildResult{}, err
+		}
+
+		previousSum, _ := assetsLayer.Metadata["cache_sha"].(string)
+		if sum == previousSum {
 			logger.Process("Reusing cached layer %s", assetsLayer.Path)
 			logger.Break()
+
+			err = environmentSetup.Link(assetsLayer.Path, context.WorkingDir)
+			if err != nil {
+				return packit.BuildResult{}, err
+			}
 
 			return packit.BuildResult{
 				Layers: []packit.Layer{assetsLayer},
 			}, nil
 		}
 
-		err = environmentSetup.Run(assetsLayer.Path, context.WorkingDir)
+		err = environmentSetup.ResetLayer(assetsLayer.Path)
 		if err != nil {
-			return packit.BuildResult{}, fmt.Errorf("failed to setup environment: %w", err)
+			return packit.BuildResult{}, err
+		}
+
+		err = environmentSetup.Link(assetsLayer.Path, context.WorkingDir)
+		if err != nil {
+			return packit.BuildResult{}, err
 		}
 
 		os.Setenv("RAILS_ENV", "production")

@@ -21,7 +21,7 @@ func main() {
 				logEmitter,
 			),
 			fs.NewChecksumCalculator(),
-			railsassets.NewDirectoriesSetup(),
+			railsassets.NewDirectorySetup(),
 			logEmitter,
 			chronos.DefaultClock,
 		),

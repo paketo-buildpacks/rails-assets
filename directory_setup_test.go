@@ -28,7 +28,7 @@ func testDirectoriesSetup(t *testing.T, context spec.G, it spec.S) {
 		workingDir, err = ioutil.TempDir("", "working-dir")
 		Expect(err).NotTo(HaveOccurred())
 
-		setup = railsassets.NewDirectoriesSetup()
+		setup = railsassets.NewDirectorySetup()
 	})
 
 	it.After(func() {
@@ -36,21 +36,43 @@ func testDirectoriesSetup(t *testing.T, context spec.G, it spec.S) {
 		Expect(os.RemoveAll(workingDir)).To(Succeed())
 	})
 
-	context("Run", func() {
-		it("cleans up directories and resets symlinks", func() {
-			err := setup.Run(layerPath, workingDir)
+	context("ResetLocal", func() {
+		it("recreates directories", func() {
+			err := setup.ResetLocal(workingDir)
 			Expect(err).NotTo(HaveOccurred())
 
-			_, err = os.Stat(filepath.Join(workingDir, "tmp", "cache", "assets"))
+			_, err = os.Stat(filepath.Join(workingDir, "public"))
 			Expect(err).NotTo(HaveOccurred())
 
-			_, err = os.Stat(filepath.Join(workingDir, "public", "assets"))
+			_, err = os.Stat(filepath.Join(workingDir, "tmp", "cache"))
+			Expect(err).NotTo(HaveOccurred())
+		})
+	})
+
+	context("ResetLayer", func() {
+		it("recreates directories", func() {
+			err := setup.ResetLayer(layerPath)
 			Expect(err).NotTo(HaveOccurred())
 
 			_, err = os.Stat(filepath.Join(layerPath, "tmp-cache-assets"))
 			Expect(err).NotTo(HaveOccurred())
 
 			_, err = os.Stat(filepath.Join(layerPath, "public-assets"))
+			Expect(err).NotTo(HaveOccurred())
+		})
+	})
+
+	context("Link", func() {
+		it.Before(func() {
+			err := os.MkdirAll(filepath.Join(workingDir, "public"), os.ModePerm)
+			Expect(err).NotTo(HaveOccurred())
+
+			err = os.MkdirAll(filepath.Join(workingDir, "tmp", "cache"), os.ModePerm)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		it("recreates directories", func() {
+			err := setup.Link(layerPath, workingDir)
 			Expect(err).NotTo(HaveOccurred())
 
 			link, err := os.Readlink(filepath.Join(workingDir, "tmp", "cache", "assets"))

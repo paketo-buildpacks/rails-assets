@@ -3,7 +3,7 @@ package fakes
 import "sync"
 
 type EnvironmentSetup struct {
-	RunCall struct {
+	LinkCall struct {
 		sync.Mutex
 		CallCount int
 		Receives  struct {
@@ -15,16 +15,58 @@ type EnvironmentSetup struct {
 		}
 		Stub func(string, string) error
 	}
+	ResetLayerCall struct {
+		sync.Mutex
+		CallCount int
+		Receives  struct {
+			LayerPath string
+		}
+		Returns struct {
+			Error error
+		}
+		Stub func(string) error
+	}
+	ResetLocalCall struct {
+		sync.Mutex
+		CallCount int
+		Receives  struct {
+			WorkingDir string
+		}
+		Returns struct {
+			Error error
+		}
+		Stub func(string) error
+	}
 }
 
-func (f *EnvironmentSetup) Run(param1 string, param2 string) error {
-	f.RunCall.Lock()
-	defer f.RunCall.Unlock()
-	f.RunCall.CallCount++
-	f.RunCall.Receives.LayerPath = param1
-	f.RunCall.Receives.WorkingDir = param2
-	if f.RunCall.Stub != nil {
-		return f.RunCall.Stub(param1, param2)
+func (f *EnvironmentSetup) Link(param1 string, param2 string) error {
+	f.LinkCall.Lock()
+	defer f.LinkCall.Unlock()
+	f.LinkCall.CallCount++
+	f.LinkCall.Receives.LayerPath = param1
+	f.LinkCall.Receives.WorkingDir = param2
+	if f.LinkCall.Stub != nil {
+		return f.LinkCall.Stub(param1, param2)
 	}
-	return f.RunCall.Returns.Error
+	return f.LinkCall.Returns.Error
+}
+func (f *EnvironmentSetup) ResetLayer(param1 string) error {
+	f.ResetLayerCall.Lock()
+	defer f.ResetLayerCall.Unlock()
+	f.ResetLayerCall.CallCount++
+	f.ResetLayerCall.Receives.LayerPath = param1
+	if f.ResetLayerCall.Stub != nil {
+		return f.ResetLayerCall.Stub(param1)
+	}
+	return f.ResetLayerCall.Returns.Error
+}
+func (f *EnvironmentSetup) ResetLocal(param1 string) error {
+	f.ResetLocalCall.Lock()
+	defer f.ResetLocalCall.Unlock()
+	f.ResetLocalCall.CallCount++
+	f.ResetLocalCall.Receives.WorkingDir = param1
+	if f.ResetLocalCall.Stub != nil {
+		return f.ResetLocalCall.Stub(param1)
+	}
+	return f.ResetLocalCall.Returns.Error
 }

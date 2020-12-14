@@ -5,12 +5,6 @@ import (
 	"path/filepath"
 )
 
-type DirectoriesSetup struct{}
-
-func NewDirectoriesSetup() DirectoriesSetup {
-	return DirectoriesSetup{}
-}
-
 const (
 	publicDir = "public"
 	assetsDir = "assets"
@@ -21,7 +15,13 @@ const (
 	tmpCacheAssetsDir = "tmp-cache-assets"
 )
 
-func (DirectoriesSetup) Run(layerPath, workingDir string) error {
+type DirectorySetup struct{}
+
+func NewDirectorySetup() DirectorySetup {
+	return DirectorySetup{}
+}
+
+func (DirectorySetup) ResetLocal(workingDir string) error {
 	err := os.RemoveAll(filepath.Join(workingDir, publicDir, assetsDir))
 	if err != nil {
 		return err
@@ -42,17 +42,25 @@ func (DirectoriesSetup) Run(layerPath, workingDir string) error {
 		return err
 	}
 
-	err = os.MkdirAll(filepath.Join(layerPath, publicAssetsDir), os.ModePerm)
-	if err != nil {
-		return err
-	}
+	return nil
+}
 
-	err = os.Symlink(filepath.Join(layerPath, publicAssetsDir), filepath.Join(workingDir, publicDir, assetsDir))
+func (DirectorySetup) ResetLayer(layerPath string) error {
+	err := os.MkdirAll(filepath.Join(layerPath, publicAssetsDir), os.ModePerm)
 	if err != nil {
 		return err
 	}
 
 	err = os.MkdirAll(filepath.Join(layerPath, tmpCacheAssetsDir), os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (DirectorySetup) Link(layerPath, workingDir string) error {
+	err := os.Symlink(filepath.Join(layerPath, publicAssetsDir), filepath.Join(workingDir, publicDir, assetsDir))
 	if err != nil {
 		return err
 	}
