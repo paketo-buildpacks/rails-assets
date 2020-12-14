@@ -50,7 +50,7 @@ func testDirectoriesSetup(t *testing.T, context spec.G, it spec.S) {
 	})
 
 	context("ResetLayer", func() {
-		it("recreates directories", func() {
+		it("creates the directories", func() {
 			err := setup.ResetLayer(layerPath)
 			Expect(err).NotTo(HaveOccurred())
 
@@ -71,7 +71,7 @@ func testDirectoriesSetup(t *testing.T, context spec.G, it spec.S) {
 			Expect(err).NotTo(HaveOccurred())
 		})
 
-		it("recreates directories", func() {
+		it("links the layer and working directory", func() {
 			err := setup.Link(layerPath, workingDir)
 			Expect(err).NotTo(HaveOccurred())
 
