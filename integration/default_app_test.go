@@ -67,13 +67,12 @@ func testDefaultApp(t *testing.T, context spec.G, it spec.S) {
 					settings.Buildpacks.RailsAssets.Online,
 					settings.Buildpacks.Puma.Online,
 				).
-				WithEnv(map[string]string{"SECRET_KEY_BASE": "gibberish"}).
 				WithPullPolicy("never").
 				Execute(name, source)
 			Expect(err).NotTo(HaveOccurred(), logs.String())
 
 			container, err = docker.Container.Run.
-				WithEnv(map[string]string{"PORT": "8080", "SECRET_KEY_BASE": "gibberish"}).
+				WithEnv(map[string]string{"PORT": "8080"}).
 				WithPublish("8080").Execute(image.ID)
 			Expect(err).NotTo(HaveOccurred())
 
