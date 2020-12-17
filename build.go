@@ -1,7 +1,6 @@
 package railsassets
 
 import (
-	"os"
 	"path/filepath"
 	"time"
 
@@ -80,8 +79,6 @@ func Build(
 		if err != nil {
 			return packit.BuildResult{}, err
 		}
-
-		os.Setenv("RAILS_ENV", "production")
 
 		logger.Process("Executing build process")
 		duration, err := clock.Measure(func() error {

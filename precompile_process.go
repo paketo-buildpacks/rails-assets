@@ -3,6 +3,7 @@ package railsassets
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/paketo-buildpacks/packit/pexec"
@@ -26,6 +27,8 @@ func NewPrecompileProcess(executable Executable, logger LogEmitter) PrecompilePr
 }
 
 func (p PrecompileProcess) Execute(workingDir string) error {
+	os.Setenv("RAILS_ENV", "production")
+
 	buffer := bytes.NewBuffer(nil)
 	args := []string{"exec", "rails", "assets:precompile", "assets:clean"}
 

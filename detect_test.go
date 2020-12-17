@@ -33,7 +33,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 		err = os.MkdirAll(filepath.Join(workingDir, "app", "assets"), os.ModePerm)
 		Expect(err).NotTo(HaveOccurred())
 
-		err = ioutil.WriteFile(filepath.Join(workingDir, "Gemfile"), []byte{}, 0644)
+		err = ioutil.WriteFile(filepath.Join(workingDir, "Gemfile"), []byte{}, 0600)
 		Expect(err).NotTo(HaveOccurred())
 
 		gemfileParser = &fakes.Parser{}
@@ -49,6 +49,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 		it.Before(func() {
 			gemfileParser.ParseCall.Returns.HasRails = true
 		})
+
 		it("detects", func() {
 			result, err := detect(packit.DetectContext{
 				WorkingDir: workingDir,
@@ -81,14 +82,50 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 							Build: true,
 						},
 					},
-					{
-						Name: "yarn",
-						Metadata: railsassets.BuildPlanMetadata{
-							Build: true,
-						},
-					},
 				},
 			}))
+		})
+
+		context("when the working directory contains a yarn.lock file", func() {
+			it.Before(func() {
+				Expect(ioutil.WriteFile(filepath.Join(workingDir, "yarn.lock"), nil, 0600)).To(Succeed())
+			})
+
+			it("detects with node_modules", func() {
+				result, err := detect(packit.DetectContext{
+					WorkingDir: workingDir,
+				})
+				Expect(err).NotTo(HaveOccurred())
+				Expect(result.Plan).To(Equal(packit.BuildPlan{
+					Provides: []packit.BuildPlanProvision{},
+					Requires: []packit.BuildPlanRequirement{
+						{
+							Name: "gems",
+							Metadata: railsassets.BuildPlanMetadata{
+								Build: true,
+							},
+						},
+						{
+							Name: "bundler",
+							Metadata: railsassets.BuildPlanMetadata{
+								Build: true,
+							},
+						},
+						{
+							Name: "mri",
+							Metadata: railsassets.BuildPlanMetadata{
+								Build: true,
+							},
+						},
+						{
+							Name: "node_modules",
+							Metadata: railsassets.BuildPlanMetadata{
+								Build: true,
+							},
+						},
+					},
+				}))
+			})
 		})
 	})
 
