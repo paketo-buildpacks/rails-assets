@@ -17,25 +17,28 @@ import (
 
 var settings struct {
 	Buildpacks struct {
-		RailsAssets struct {
-			Online string
-		}
-		MRI struct {
+		BundleInstall struct {
 			Online string
 		}
 		Bundler struct {
 			Online string
 		}
-		BundleInstall struct {
+		MRI struct {
 			Online string
 		}
-		Yarn struct {
+		NodeEngine struct {
 			Online string
 		}
 		Puma struct {
 			Online string
 		}
-		NodeEngine struct {
+		RailsAssets struct {
+			Online string
+		}
+		Yarn struct {
+			Online string
+		}
+		YarnInstall struct {
 			Online string
 		}
 	}
@@ -46,13 +49,17 @@ var settings struct {
 	}
 
 	Config struct {
-		MRI           string `json:"mri"`
-		Bundler       string `json:"bundler"`
 		BundleInstall string `json:"bundle-install"`
-		Puma          string `json:"puma"`
+		Bundler       string `json:"bundler"`
+		MRI           string `json:"mri"`
 		NodeEngine    string `json:"node-engine"`
+		Puma          string `json:"puma"`
 		Yarn          string `json:"yarn"`
+		YarnInstall   string `json:"yarn-install"`
 	}
+
+	Pack   occam.Pack
+	Docker occam.Docker
 }
 
 func TestIntegration(t *testing.T) {
@@ -80,34 +87,41 @@ func TestIntegration(t *testing.T) {
 		Execute(root)
 	Expect(err).NotTo(HaveOccurred())
 
-	settings.Buildpacks.MRI.Online, err = buildpackStore.Get.
-		Execute(settings.Config.MRI)
+	settings.Buildpacks.BundleInstall.Online, err = buildpackStore.Get.
+		Execute(settings.Config.BundleInstall)
 	Expect(err).NotTo(HaveOccurred())
 
 	settings.Buildpacks.Bundler.Online, err = buildpackStore.Get.
 		Execute(settings.Config.Bundler)
 	Expect(err).NotTo(HaveOccurred())
 
-	settings.Buildpacks.BundleInstall.Online, err = buildpackStore.Get.
-		Execute(settings.Config.BundleInstall)
-	Expect(err).NotTo(HaveOccurred())
-
-	settings.Buildpacks.Puma.Online, err = buildpackStore.Get.
-		Execute(settings.Config.Puma)
+	settings.Buildpacks.MRI.Online, err = buildpackStore.Get.
+		Execute(settings.Config.MRI)
 	Expect(err).NotTo(HaveOccurred())
 
 	settings.Buildpacks.NodeEngine.Online, err = buildpackStore.Get.
 		Execute(settings.Config.NodeEngine)
 	Expect(err).NotTo(HaveOccurred())
 
+	settings.Buildpacks.Puma.Online, err = buildpackStore.Get.
+		Execute(settings.Config.Puma)
+	Expect(err).NotTo(HaveOccurred())
+
 	settings.Buildpacks.Yarn.Online, err = buildpackStore.Get.
 		Execute(settings.Config.Yarn)
 	Expect(err).NotTo(HaveOccurred())
 
-	SetDefaultEventuallyTimeout(10 * time.Second)
+	settings.Buildpacks.YarnInstall.Online, err = buildpackStore.Get.
+		Execute(settings.Config.YarnInstall)
+	Expect(err).NotTo(HaveOccurred())
+
+	SetDefaultEventuallyTimeout(30 * time.Second)
+
+	settings.Pack = occam.NewPack().WithVerbose()
+	settings.Docker = occam.NewDocker()
 
 	suite := spec.New("Integration", spec.Parallel(), spec.Report(report.Terminal{}))
-	suite("DefaultApp", testDefaultApp)
-	suite("Caching", testCaching)
+	suite("Rails5.0", testRails50)
+	suite("Rails6.0", testRails60)
 	suite.Run(t)
 }
