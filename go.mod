@@ -7,12 +7,10 @@ require (
 	github.com/fatih/color v1.10.0 // indirect
 	github.com/google/go-cmp v0.5.4 // indirect
 	github.com/onsi/gomega v1.10.4
-	github.com/opencontainers/go-digest v1.0.0 // indirect
-	github.com/paketo-buildpacks/occam v0.0.22
+	github.com/paketo-buildpacks/occam v0.0.23
 	github.com/paketo-buildpacks/packit v0.5.0
 	github.com/sclevine/spec v1.4.0
 	golang.org/x/net v0.0.0-20201207224615-747e23833adb // indirect
-	golang.org/x/sync v0.0.0-20201020160332-67f06af15bc9 // indirect
 	golang.org/x/sys v0.0.0-20201207223542-d4d67f95c62d // indirect
 	golang.org/x/text v0.3.4 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
