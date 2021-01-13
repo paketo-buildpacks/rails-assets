@@ -83,37 +83,71 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 	})
 
 	it("returns a result that precompiles assets", func() {
-		_, err := build(packit.BuildContext{
+		result, err := build(packit.BuildContext{
 			WorkingDir: workingDir,
 			CNBPath:    cnbDir,
 			Stack:      "some-stack",
+			Layers:     packit.Layers{Path: layersDir},
 			BuildpackInfo: packit.BuildpackInfo{
 				Name:    "Some Buildpack",
 				Version: "some-version",
 			},
 		})
 		Expect(err).NotTo(HaveOccurred())
+		Expect(result).To(Equal(packit.BuildResult{
+			Layers: []packit.Layer{
+				{
+					Path:      filepath.Join(layersDir, "assets"),
+					Name:      "assets",
+					Launch:    true,
+					SharedEnv: packit.Environment{},
+					BuildEnv:  packit.Environment{},
+					LaunchEnv: packit.Environment{
+						"RAILS_ENV.default":                "production",
+						"RAILS_SERVE_STATIC_FILES.default": "true",
+					},
+					Metadata: map[string]interface{}{
+						"built_at":  timeStamp.Format(time.RFC3339Nano),
+						"cache_sha": "some-calculator-sha",
+					},
+				},
+			},
+		}))
 
 		Expect(buildProcess.ExecuteCall.CallCount).To(Equal(1))
 		Expect(buildProcess.ExecuteCall.Receives.WorkingDir).To(Equal(workingDir))
 
 		Expect(buffer.String()).To(ContainSubstring("Some Buildpack some-version"))
 		Expect(buffer.String()).To(ContainSubstring("Executing build process"))
+		Expect(buffer.String()).To(ContainSubstring("Configuring environment"))
+		Expect(buffer.String()).To(ContainSubstring(`RAILS_ENV                -> "production"`))
+		Expect(buffer.String()).To(ContainSubstring(`RAILS_SERVE_STATIC_FILES -> "true"`))
 	})
 
 	context("when checksum matches", func() {
 		it.Before(func() {
-			err := ioutil.WriteFile(filepath.Join(layersDir, fmt.Sprintf("%s.toml", railsassets.LayerNameAssets)), []byte(fmt.Sprintf(`[metadata]
-			cache_sha = "some-calculator-sha"
-			built_at = "%s"
+			err := ioutil.WriteFile(filepath.Join(layersDir, fmt.Sprintf("%s.toml", railsassets.LayerNameAssets)), []byte(fmt.Sprintf(`
+launch = true
+
+[metadata]
+	cache_sha = "some-calculator-sha"
+	built_at = "%s"
 			`, timeStamp.Format(time.RFC3339Nano))), 0600)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(os.MkdirAll(filepath.Join(layersDir, "assets", "env.launch"), os.ModePerm)).To(Succeed())
+
+			err = ioutil.WriteFile(filepath.Join(layersDir, "assets", "env.launch", "RAILS_ENV.default"), []byte("production"), 0600)
+			Expect(err).NotTo(HaveOccurred())
+
+			err = ioutil.WriteFile(filepath.Join(layersDir, "assets", "env.launch", "RAILS_SERVE_STATIC_FILES.default"), []byte("true"), 0600)
 			Expect(err).NotTo(HaveOccurred())
 
 			calculator.SumCall.Returns.String = "some-calculator-sha"
 		})
 
 		it("reuses the cached layer", func() {
-			_, err := build(packit.BuildContext{
+			result, err := build(packit.BuildContext{
 				WorkingDir: workingDir,
 				CNBPath:    cnbDir,
 				Stack:      "some-stack",
@@ -124,6 +158,25 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				Layers: packit.Layers{Path: layersDir},
 			})
 			Expect(err).NotTo(HaveOccurred())
+			Expect(result).To(Equal(packit.BuildResult{
+				Layers: []packit.Layer{
+					{
+						Path:      filepath.Join(layersDir, "assets"),
+						Name:      "assets",
+						Launch:    true,
+						SharedEnv: packit.Environment{},
+						BuildEnv:  packit.Environment{},
+						LaunchEnv: packit.Environment{
+							"RAILS_ENV.default":                "production",
+							"RAILS_SERVE_STATIC_FILES.default": "true",
+						},
+						Metadata: map[string]interface{}{
+							"built_at":  timeStamp.Format(time.RFC3339Nano),
+							"cache_sha": "some-calculator-sha",
+						},
+					},
+				},
+			}))
 
 			Expect(buildProcess.ExecuteCall.CallCount).To(Equal(0))
 

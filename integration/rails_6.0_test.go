@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"net/http/httputil"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/paketo-buildpacks/occam"
 	"github.com/sclevine/spec"
 
@@ -89,22 +89,35 @@ func testRails60(t *testing.T, context spec.G, it spec.S) {
 
 		response, err := http.Get(fmt.Sprintf("http://localhost:%s", container.HostPort("8080")))
 		Expect(err).NotTo(HaveOccurred())
-		defer response.Body.Close()
+		Expect(response.StatusCode).To(Equal(http.StatusOK))
 
-		Expect(response.StatusCode).To(Equal(http.StatusOK), func() string {
-			dump, _ := httputil.DumpResponse(response, true)
-			logs, _ := settings.Docker.Container.Logs.Execute(container.ID)
-			return fmt.Sprintf("reponse:\n%s\n\nlogs:\n%s\n", dump, logs)
+		document, err := goquery.NewDocumentFromReader(response.Body)
+		Expect(err).NotTo(HaveOccurred())
+
+		Expect(response.Body.Close()).To(Succeed())
+
+		var path string
+		document.Find("script").Each(func(i int, selection *goquery.Selection) {
+			path, _ = selection.Attr("src")
 		})
+
+		response, err = http.Get(fmt.Sprintf("http://localhost:%s%s", container.HostPort("8080"), path))
+		Expect(err).NotTo(HaveOccurred())
+		defer response.Body.Close()
 
 		content, err := ioutil.ReadAll(response.Body)
 		Expect(err).NotTo(HaveOccurred())
-		Expect(string(content)).To(ContainSubstring("Hello World"))
+		Expect(string(content)).To(ContainSubstring("Hello from Javascript!"))
 
 		Expect(logs).To(ContainLines(
 			MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, settings.Buildpack.Name)),
 			"  Executing build process",
 			"    Running 'bundle exec rails assets:precompile assets:clean'",
+			MatchRegexp(`      Completed in ([0-9]*(\.[0-9]*)?[a-z]+)+`),
+			"",
+			"  Configuring environment",
+			`    RAILS_ENV                -> "production"`,
+			`    RAILS_SERVE_STATIC_FILES -> "true"`,
 		))
 	})
 

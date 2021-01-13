@@ -87,11 +87,15 @@ func Build(
 		if err != nil {
 			return packit.BuildResult{}, err
 		}
+
 		logger.Action("Completed in %s", duration.Round(time.Millisecond))
 		logger.Break()
 
 		assetsLayer.Launch = true
 		assetsLayer.LaunchEnv.Default("RAILS_ENV", "production")
+		assetsLayer.LaunchEnv.Default("RAILS_SERVE_STATIC_FILES", "true")
+
+		logger.Environment(assetsLayer.LaunchEnv)
 
 		assetsLayer.Metadata = map[string]interface{}{
 			"built_at":  clock.Now().Format(time.RFC3339Nano),
