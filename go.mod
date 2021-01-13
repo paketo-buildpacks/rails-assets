@@ -4,6 +4,7 @@ go 1.15
 
 require (
 	github.com/BurntSushi/toml v0.3.1
+	github.com/PuerkitoBio/goquery v1.6.1
 	github.com/fatih/color v1.10.0 // indirect
 	github.com/google/go-cmp v0.5.4 // indirect
 	github.com/onsi/gomega v1.10.4

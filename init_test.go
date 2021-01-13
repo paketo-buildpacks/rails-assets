@@ -8,11 +8,11 @@ import (
 )
 
 func TestUnitRails(t *testing.T) {
-	suite := spec.New("rails", spec.Report(report.Terminal{}))
+	suite := spec.New("railsassets", spec.Report(report.Terminal{}))
 	suite("Build", testBuild)
 	suite("Detect", testDetect)
-	suite("PrecompleProcess", testPrecompileProcess)
-	suite("GemfileParser", testGemfileParser)
 	suite("DirectorySetup", testDirectorySetup)
+	suite("GemfileParser", testGemfileParser)
+	suite("PrecompileProcess", testPrecompileProcess)
 	suite.Run(t)
 }
