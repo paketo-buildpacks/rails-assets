@@ -2,7 +2,6 @@ package integration_test
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -101,13 +100,7 @@ func testRails60(t *testing.T, context spec.G, it spec.S) {
 			path, _ = selection.Attr("src")
 		})
 
-		response, err = http.Get(fmt.Sprintf("http://localhost:%s%s", container.HostPort("8080"), path))
-		Expect(err).NotTo(HaveOccurred())
-		defer response.Body.Close()
-
-		content, err := ioutil.ReadAll(response.Body)
-		Expect(err).NotTo(HaveOccurred())
-		Expect(string(content)).To(ContainSubstring("Hello from Javascript!"))
+		Eventually(container).Should(Serve(ContainSubstring("Hello from Javascript!")).OnPort(8080).WithEndpoint(path))
 
 		Expect(logs).To(ContainLines(
 			MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, settings.Buildpack.Name)),
