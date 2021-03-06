@@ -5,39 +5,39 @@ import (
 	"path/filepath"
 )
 
-const (
-	publicDir = "public"
-	assetsDir = "assets"
-	tmpDir    = "tmp"
-	cacheDir  = "cache"
-
-	publicAssetsDir   = "public-assets"
-	tmpCacheAssetsDir = "tmp-cache-assets"
-)
-
+// DirectorySetup performs the operations necessary to setup a valid working
+// directory and link it to the layers created by the buildpack.
 type DirectorySetup struct{}
 
+// NewDirectorySetup initializes a DirectorySetup instance.
 func NewDirectorySetup() DirectorySetup {
 	return DirectorySetup{}
 }
 
+// ResetLocal deletes public/assets and tmp/cache/assets directories. These
+// directories will be replaced by links to directories internal to the
+// "assets" layer that is created by this buildpack.
+//
+// Additionally, ResetLocal ensures that the working directory at least
+// contains a public and tmp/cache directory so that these links have a
+// location to be placed into.
 func (DirectorySetup) ResetLocal(workingDir string) error {
-	err := os.RemoveAll(filepath.Join(workingDir, publicDir, assetsDir))
+	err := os.RemoveAll(filepath.Join(workingDir, "public", "assets"))
 	if err != nil {
 		return err
 	}
 
-	err = os.MkdirAll(filepath.Join(workingDir, publicDir), os.ModePerm)
+	err = os.RemoveAll(filepath.Join(workingDir, "tmp", "cache", "assets"))
 	if err != nil {
 		return err
 	}
 
-	err = os.RemoveAll(filepath.Join(workingDir, tmpDir, cacheDir, assetsDir))
+	err = os.MkdirAll(filepath.Join(workingDir, "public"), os.ModePerm)
 	if err != nil {
 		return err
 	}
 
-	err = os.MkdirAll(filepath.Join(workingDir, tmpDir, cacheDir), os.ModePerm)
+	err = os.MkdirAll(filepath.Join(workingDir, "tmp", "cache"), os.ModePerm)
 	if err != nil {
 		return err
 	}
@@ -45,13 +45,16 @@ func (DirectorySetup) ResetLocal(workingDir string) error {
 	return nil
 }
 
+// ResetLayer ensures that the "assets" layer contains public-assets and
+// tmp-cache-assets directories. These directories will hold the results of
+// running the "rails assets:precompile" build process.
 func (DirectorySetup) ResetLayer(layerPath string) error {
-	err := os.MkdirAll(filepath.Join(layerPath, publicAssetsDir), os.ModePerm)
+	err := os.MkdirAll(filepath.Join(layerPath, "public-assets"), os.ModePerm)
 	if err != nil {
 		return err
 	}
 
-	err = os.MkdirAll(filepath.Join(layerPath, tmpCacheAssetsDir), os.ModePerm)
+	err = os.MkdirAll(filepath.Join(layerPath, "tmp-cache-assets"), os.ModePerm)
 	if err != nil {
 		return err
 	}
@@ -59,13 +62,18 @@ func (DirectorySetup) ResetLayer(layerPath string) error {
 	return nil
 }
 
+// Link creates symlinks between the working directory and the directories in
+// the "assets" layer that contain the results of the "rails assets:precompile"
+// build process. This makes those contents appear as if they are part of the
+// application source code while still being located in a layer that can be
+// cached and reused on subsequent builds.
 func (DirectorySetup) Link(layerPath, workingDir string) error {
-	err := os.Symlink(filepath.Join(layerPath, publicAssetsDir), filepath.Join(workingDir, publicDir, assetsDir))
+	err := os.Symlink(filepath.Join(layerPath, "public-assets"), filepath.Join(workingDir, "public", "assets"))
 	if err != nil {
 		return err
 	}
 
-	err = os.Symlink(filepath.Join(layerPath, tmpCacheAssetsDir), filepath.Join(workingDir, tmpDir, cacheDir, assetsDir))
+	err = os.Symlink(filepath.Join(layerPath, "tmp-cache-assets"), filepath.Join(workingDir, "tmp", "cache", "assets"))
 	if err != nil {
 		return err
 	}

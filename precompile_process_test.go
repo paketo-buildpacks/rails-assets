@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/paketo-buildpacks/packit/pexec"
+	"github.com/paketo-buildpacks/packit/scribe"
 	railsassets "github.com/paketo-buildpacks/rails-assets"
 	"github.com/paketo-buildpacks/rails-assets/fakes"
 	"github.com/sclevine/spec"
@@ -44,9 +45,9 @@ func testPrecompileProcess(t *testing.T, context spec.G, it spec.S) {
 			path = os.Getenv("PATH")
 			os.Setenv("PATH", "/some/bin")
 
-			logEmitter := railsassets.NewLogEmitter(bytes.NewBuffer(nil))
+			logger := scribe.NewLogger(bytes.NewBuffer(nil))
 
-			precompileProcess = railsassets.NewPrecompileProcess(executable, logEmitter)
+			precompileProcess = railsassets.NewPrecompileProcess(executable, logger)
 		})
 
 		it.After(func() {

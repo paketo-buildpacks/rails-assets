@@ -7,25 +7,33 @@ import (
 	"strings"
 
 	"github.com/paketo-buildpacks/packit/pexec"
+	"github.com/paketo-buildpacks/packit/scribe"
 )
 
 //go:generate faux --interface Executable --output fakes/executable.go
+
+// Executable defines the interface for executing a program as a child process.
 type Executable interface {
 	Execute(pexec.Execution) error
 }
 
+// PrecompileProcess performs the "rails assets:precompile" build process.
 type PrecompileProcess struct {
 	executable Executable
-	logger     LogEmitter
+	logger     scribe.Logger
 }
 
-func NewPrecompileProcess(executable Executable, logger LogEmitter) PrecompileProcess {
+// NewPrecompileProcess initializes an instance of PrecompileProcess.
+func NewPrecompileProcess(executable Executable, logger scribe.Logger) PrecompileProcess {
 	return PrecompileProcess{
 		executable: executable,
 		logger:     logger,
 	}
 }
 
+// Execute runs "bundle exec rails assets:precompile assets:clean" as a child
+// process. If the process fails, the error message will include the entire
+// output of the child process.
 func (p PrecompileProcess) Execute(workingDir string) error {
 	os.Setenv("RAILS_ENV", "production")
 

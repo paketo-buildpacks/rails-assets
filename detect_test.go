@@ -30,9 +30,6 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 		workingDir, err = ioutil.TempDir("", "working-dir")
 		Expect(err).NotTo(HaveOccurred())
 
-		err = os.MkdirAll(filepath.Join(workingDir, "app", "assets"), os.ModePerm)
-		Expect(err).NotTo(HaveOccurred())
-
 		err = ioutil.WriteFile(filepath.Join(workingDir, "Gemfile"), []byte{}, 0600)
 		Expect(err).NotTo(HaveOccurred())
 
@@ -45,53 +42,17 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 		Expect(os.RemoveAll(workingDir)).To(Succeed())
 	})
 
-	context("when the Gemfile lists rails and the app/assets directory exists", func() {
+	context("when the Gemfile lists rails", func() {
 		it.Before(func() {
 			gemfileParser.ParseCall.Returns.HasRails = true
 		})
 
-		it("detects", func() {
-			result, err := detect(packit.DetectContext{
-				WorkingDir: workingDir,
-			})
-			Expect(err).NotTo(HaveOccurred())
-			Expect(result.Plan).To(Equal(packit.BuildPlan{
-				Provides: []packit.BuildPlanProvision{},
-				Requires: []packit.BuildPlanRequirement{
-					{
-						Name: "gems",
-						Metadata: railsassets.BuildPlanMetadata{
-							Build: true,
-						},
-					},
-					{
-						Name: "bundler",
-						Metadata: railsassets.BuildPlanMetadata{
-							Build: true,
-						},
-					},
-					{
-						Name: "mri",
-						Metadata: railsassets.BuildPlanMetadata{
-							Build: true,
-						},
-					},
-					{
-						Name: "node",
-						Metadata: railsassets.BuildPlanMetadata{
-							Build: true,
-						},
-					},
-				},
-			}))
-		})
-
-		context("when the working directory contains a yarn.lock file", func() {
+		context("when the app/assets directory is present", func() {
 			it.Before(func() {
-				Expect(ioutil.WriteFile(filepath.Join(workingDir, "yarn.lock"), nil, 0600)).To(Succeed())
+				Expect(os.MkdirAll(filepath.Join(workingDir, "app", "assets"), os.ModePerm)).To(Succeed())
 			})
 
-			it("detects with node_modules", func() {
+			it("detects", func() {
 				result, err := detect(packit.DetectContext{
 					WorkingDir: workingDir,
 				})
@@ -99,32 +60,110 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 				Expect(result.Plan).To(Equal(packit.BuildPlan{
 					Provides: []packit.BuildPlanProvision{},
 					Requires: []packit.BuildPlanRequirement{
-						{
-							Name: "gems",
-							Metadata: railsassets.BuildPlanMetadata{
-								Build: true,
-							},
-						},
-						{
-							Name: "bundler",
-							Metadata: railsassets.BuildPlanMetadata{
-								Build: true,
-							},
-						},
-						{
-							Name: "mri",
-							Metadata: railsassets.BuildPlanMetadata{
-								Build: true,
-							},
-						},
-						{
-							Name: "node_modules",
-							Metadata: railsassets.BuildPlanMetadata{
-								Build: true,
-							},
-						},
+						{Name: "node", Metadata: railsassets.BuildPlanMetadata{Build: true}},
+						{Name: "mri", Metadata: railsassets.BuildPlanMetadata{Build: true}},
+						{Name: "bundler", Metadata: railsassets.BuildPlanMetadata{Build: true}},
+						{Name: "gems", Metadata: railsassets.BuildPlanMetadata{Build: true}},
 					},
 				}))
+			})
+
+			context("when the working directory contains a yarn.lock file", func() {
+				it.Before(func() {
+					Expect(ioutil.WriteFile(filepath.Join(workingDir, "yarn.lock"), nil, 0600)).To(Succeed())
+				})
+
+				it("detects with node_modules", func() {
+					result, err := detect(packit.DetectContext{
+						WorkingDir: workingDir,
+					})
+					Expect(err).NotTo(HaveOccurred())
+					Expect(result.Plan).To(Equal(packit.BuildPlan{
+						Provides: []packit.BuildPlanProvision{},
+						Requires: []packit.BuildPlanRequirement{
+							{Name: "node", Metadata: railsassets.BuildPlanMetadata{Build: true}},
+							{Name: "mri", Metadata: railsassets.BuildPlanMetadata{Build: true}},
+							{Name: "bundler", Metadata: railsassets.BuildPlanMetadata{Build: true}},
+							{Name: "gems", Metadata: railsassets.BuildPlanMetadata{Build: true}},
+							{Name: "node_modules", Metadata: railsassets.BuildPlanMetadata{Build: true}},
+						},
+					}))
+				})
+			})
+		})
+
+		context("when the lib/assets directory is present", func() {
+			it.Before(func() {
+				Expect(os.MkdirAll(filepath.Join(workingDir, "lib", "assets"), os.ModePerm)).To(Succeed())
+			})
+
+			it("detects", func() {
+				result, err := detect(packit.DetectContext{
+					WorkingDir: workingDir,
+				})
+				Expect(err).NotTo(HaveOccurred())
+				Expect(result.Plan).To(Equal(packit.BuildPlan{
+					Provides: []packit.BuildPlanProvision{},
+					Requires: []packit.BuildPlanRequirement{
+						{Name: "node", Metadata: railsassets.BuildPlanMetadata{Build: true}},
+						{Name: "mri", Metadata: railsassets.BuildPlanMetadata{Build: true}},
+						{Name: "bundler", Metadata: railsassets.BuildPlanMetadata{Build: true}},
+						{Name: "gems", Metadata: railsassets.BuildPlanMetadata{Build: true}},
+					},
+				}))
+			})
+		})
+
+		context("when the vendor/assets directory is present", func() {
+			it.Before(func() {
+				Expect(os.MkdirAll(filepath.Join(workingDir, "vendor", "assets"), os.ModePerm)).To(Succeed())
+			})
+
+			it("detects", func() {
+				result, err := detect(packit.DetectContext{
+					WorkingDir: workingDir,
+				})
+				Expect(err).NotTo(HaveOccurred())
+				Expect(result.Plan).To(Equal(packit.BuildPlan{
+					Provides: []packit.BuildPlanProvision{},
+					Requires: []packit.BuildPlanRequirement{
+						{Name: "node", Metadata: railsassets.BuildPlanMetadata{Build: true}},
+						{Name: "mri", Metadata: railsassets.BuildPlanMetadata{Build: true}},
+						{Name: "bundler", Metadata: railsassets.BuildPlanMetadata{Build: true}},
+						{Name: "gems", Metadata: railsassets.BuildPlanMetadata{Build: true}},
+					},
+				}))
+			})
+		})
+
+		context("when the app/javascript directory is present", func() {
+			it.Before(func() {
+				Expect(os.MkdirAll(filepath.Join(workingDir, "app", "javascript"), os.ModePerm)).To(Succeed())
+			})
+
+			it("detects", func() {
+				result, err := detect(packit.DetectContext{
+					WorkingDir: workingDir,
+				})
+				Expect(err).NotTo(HaveOccurred())
+				Expect(result.Plan).To(Equal(packit.BuildPlan{
+					Provides: []packit.BuildPlanProvision{},
+					Requires: []packit.BuildPlanRequirement{
+						{Name: "node", Metadata: railsassets.BuildPlanMetadata{Build: true}},
+						{Name: "mri", Metadata: railsassets.BuildPlanMetadata{Build: true}},
+						{Name: "bundler", Metadata: railsassets.BuildPlanMetadata{Build: true}},
+						{Name: "gems", Metadata: railsassets.BuildPlanMetadata{Build: true}},
+					},
+				}))
+			})
+		})
+
+		context("when there are no asset directories", func() {
+			it("fails with an error message", func() {
+				_, err := detect(packit.DetectContext{
+					WorkingDir: workingDir,
+				})
+				Expect(err).To(MatchError(packit.Fail.WithMessage("failed to find assets in app/assets, app/javascript, lib/assets, or vendor/assets")))
 			})
 		})
 	})
@@ -132,28 +171,15 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 	context("when the Gemfile does not list rails", func() {
 		it.Before(func() {
 			gemfileParser.ParseCall.Returns.HasRails = false
+
+			Expect(os.MkdirAll(filepath.Join(workingDir, "app", "javascript"), os.ModePerm)).To(Succeed())
 		})
 
-		it("detect should fail with error", func() {
+		it("fails with an error message", func() {
 			_, err := detect(packit.DetectContext{
 				WorkingDir: workingDir,
 			})
-			Expect(err).To(MatchError(packit.Fail))
-		})
-	})
-
-	context("when the app/assets directory does not exist", func() {
-		it.Before(func() {
-			gemfileParser.ParseCall.Returns.HasRails = true
-			err := os.RemoveAll(filepath.Join(workingDir, "app/assets"))
-			Expect(err).NotTo(HaveOccurred())
-		})
-
-		it("detect should fail with error", func() {
-			_, err := detect(packit.DetectContext{
-				WorkingDir: workingDir,
-			})
-			Expect(err).To(MatchError(packit.Fail))
+			Expect(err).To(MatchError(packit.Fail.WithMessage("failed to find rails gem in Gemfile")))
 		})
 	})
 
@@ -161,6 +187,8 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 		context("when the gemfile parser fails", func() {
 			it.Before(func() {
 				gemfileParser.ParseCall.Returns.Err = errors.New("some-error")
+
+				Expect(os.MkdirAll(filepath.Join(workingDir, "lib", "assets"), os.ModePerm)).To(Succeed())
 			})
 
 			it("returns an error", func() {

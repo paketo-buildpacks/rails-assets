@@ -12,6 +12,7 @@ import (
 
 	"github.com/paketo-buildpacks/packit"
 	"github.com/paketo-buildpacks/packit/chronos"
+	"github.com/paketo-buildpacks/packit/scribe"
 	railsassets "github.com/paketo-buildpacks/rails-assets"
 	"github.com/paketo-buildpacks/rails-assets/fakes"
 	"github.com/sclevine/spec"
@@ -61,7 +62,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		buildProcess = &fakes.BuildProcess{}
 
 		buffer = bytes.NewBuffer(nil)
-		logEmitter := railsassets.NewLogEmitter(buffer)
+		logger := scribe.NewLogger(buffer)
 
 		timeStamp = time.Now()
 		clock = chronos.NewClock(func() time.Time {
@@ -73,7 +74,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		environmentSetup = &fakes.EnvironmentSetup{}
 
-		build = railsassets.Build(buildProcess, calculator, environmentSetup, logEmitter, clock)
+		build = railsassets.Build(buildProcess, calculator, environmentSetup, logger, clock)
 	})
 
 	it.After(func() {
@@ -119,7 +120,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		Expect(buffer.String()).To(ContainSubstring("Some Buildpack some-version"))
 		Expect(buffer.String()).To(ContainSubstring("Executing build process"))
-		Expect(buffer.String()).To(ContainSubstring("Configuring environment"))
+		Expect(buffer.String()).To(ContainSubstring("Configuring launch environment"))
 		Expect(buffer.String()).To(ContainSubstring(`RAILS_ENV                -> "production"`))
 		Expect(buffer.String()).To(ContainSubstring(`RAILS_SERVE_STATIC_FILES -> "true"`))
 	})
@@ -178,10 +179,89 @@ launch = true
 				},
 			}))
 
+			Expect(calculator.SumCall.Receives.Paths).To(Equal([]string{
+				filepath.Join(workingDir, "app", "assets"),
+			}))
+
 			Expect(buildProcess.ExecuteCall.CallCount).To(Equal(0))
 
 			Expect(buffer.String()).To(ContainSubstring("Some Buildpack some-version"))
 			Expect(buffer.String()).To(ContainSubstring("Reusing cached layer"))
+		})
+
+		context("when there is a lib/assets directory", func() {
+			it.Before(func() {
+				Expect(os.RemoveAll(filepath.Join(workingDir, "app", "assets"))).To(Succeed())
+				Expect(os.MkdirAll(filepath.Join(workingDir, "lib", "assets"), os.ModePerm)).To(Succeed())
+			})
+
+			it("uses that directory to calculate the checksum", func() {
+				_, err := build(packit.BuildContext{
+					WorkingDir: workingDir,
+					CNBPath:    cnbDir,
+					Stack:      "some-stack",
+					BuildpackInfo: packit.BuildpackInfo{
+						Name:    "Some Buildpack",
+						Version: "some-version",
+					},
+					Layers: packit.Layers{Path: layersDir},
+				})
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(calculator.SumCall.Receives.Paths).To(Equal([]string{
+					filepath.Join(workingDir, "lib", "assets"),
+				}))
+			})
+		})
+
+		context("when there is a vendor/assets directory", func() {
+			it.Before(func() {
+				Expect(os.RemoveAll(filepath.Join(workingDir, "app", "assets"))).To(Succeed())
+				Expect(os.MkdirAll(filepath.Join(workingDir, "vendor", "assets"), os.ModePerm)).To(Succeed())
+			})
+
+			it("uses that directory to calculate the checksum", func() {
+				_, err := build(packit.BuildContext{
+					WorkingDir: workingDir,
+					CNBPath:    cnbDir,
+					Stack:      "some-stack",
+					BuildpackInfo: packit.BuildpackInfo{
+						Name:    "Some Buildpack",
+						Version: "some-version",
+					},
+					Layers: packit.Layers{Path: layersDir},
+				})
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(calculator.SumCall.Receives.Paths).To(Equal([]string{
+					filepath.Join(workingDir, "vendor", "assets"),
+				}))
+			})
+		})
+
+		context("when there is a vendor/assets directory", func() {
+			it.Before(func() {
+				Expect(os.RemoveAll(filepath.Join(workingDir, "app", "assets"))).To(Succeed())
+				Expect(os.MkdirAll(filepath.Join(workingDir, "app", "javascript"), os.ModePerm)).To(Succeed())
+			})
+
+			it("uses that directory to calculate the checksum", func() {
+				_, err := build(packit.BuildContext{
+					WorkingDir: workingDir,
+					CNBPath:    cnbDir,
+					Stack:      "some-stack",
+					BuildpackInfo: packit.BuildpackInfo{
+						Name:    "Some Buildpack",
+						Version: "some-version",
+					},
+					Layers: packit.Layers{Path: layersDir},
+				})
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(calculator.SumCall.Receives.Paths).To(Equal([]string{
+					filepath.Join(workingDir, "app", "javascript"),
+				}))
+			})
 		})
 
 		context("failure cases", func() {
