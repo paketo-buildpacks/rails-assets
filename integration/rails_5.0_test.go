@@ -107,7 +107,7 @@ func testRails50(t *testing.T, context spec.G, it spec.S) {
 			"    Running 'bundle exec rails assets:precompile assets:clean'",
 			MatchRegexp(`      Completed in ([0-9]*(\.[0-9]*)?[a-z]+)+`),
 			"",
-			"  Configuring environment",
+			"  Configuring launch environment",
 			`    RAILS_ENV                -> "production"`,
 			`    RAILS_SERVE_STATIC_FILES -> "true"`,
 		))

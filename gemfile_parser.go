@@ -7,12 +7,16 @@ import (
 	"regexp"
 )
 
+// GemfileParser parses the Gemfile to confirm that the application is using
+// Rails.
 type GemfileParser struct{}
 
+// NewGemfileParser initializes a GemfileParser instance.
 func NewGemfileParser() GemfileParser {
 	return GemfileParser{}
 }
 
+// Parse scans the Gemfile to find the "rails" gem.
 func (p GemfileParser) Parse(path string) (bool, error) {
 	file, err := os.Open(path)
 	if err != nil {

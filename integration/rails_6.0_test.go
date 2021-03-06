@@ -108,7 +108,7 @@ func testRails60(t *testing.T, context spec.G, it spec.S) {
 			"    Running 'bundle exec rails assets:precompile assets:clean'",
 			MatchRegexp(`      Completed in ([0-9]*(\.[0-9]*)?[a-z]+)+`),
 			"",
-			"  Configuring environment",
+			"  Configuring launch environment",
 			`    RAILS_ENV                -> "production"`,
 			`    RAILS_SERVE_STATIC_FILES -> "true"`,
 		))
@@ -162,6 +162,64 @@ func testRails60(t *testing.T, context spec.G, it spec.S) {
 				fmt.Sprintf("%s %s", settings.Buildpack.Name, "1.2.3"),
 				fmt.Sprintf("  Reusing cached layer /layers/%s/assets", strings.ReplaceAll(settings.Buildpack.ID, "/", "_")),
 			))
+		})
+
+		context("when the app/javascript directory changes", func() {
+			it("rebuilds the assets layer", func() {
+				build := settings.Pack.WithNoColor().Build.
+					WithBuildpacks(buildpacks...).
+					WithPullPolicy("never")
+
+				firstImage, firstLogs, err := build.Execute(name, source)
+				Expect(err).NotTo(HaveOccurred(), firstLogs.String())
+
+				imageIDs[firstImage.ID] = struct{}{}
+
+				Expect(firstImage.Buildpacks).To(HaveLen(8))
+				Expect(firstImage.Buildpacks[6].Key).To(Equal(settings.Buildpack.ID))
+				Expect(firstImage.Buildpacks[6].Layers).To(HaveKey("assets"))
+
+				container, err := settings.Docker.Container.Run.
+					WithCommand(fmt.Sprintf("ls -alR /layers/%s/assets/public/assets", strings.ReplaceAll(settings.Buildpack.ID, "/", "_"))).
+					Execute(firstImage.ID)
+				Expect(err).NotTo(HaveOccurred())
+
+				containerIDs[container.ID] = struct{}{}
+
+				file, err := os.OpenFile(filepath.Join(source, "app", "javascript", "packs", "application.js"), os.O_APPEND|os.O_RDWR, 0600)
+				Expect(err).NotTo(HaveOccurred())
+
+				_, err = file.WriteString("// HERE IS A COMMENT")
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(file.Close()).To(Succeed())
+
+				secondImage, secondLogs, err := build.Execute(name, source)
+				Expect(err).NotTo(HaveOccurred(), secondLogs.String)
+
+				imageIDs[secondImage.ID] = struct{}{}
+
+				Expect(secondImage.Buildpacks).To(HaveLen(8))
+				Expect(secondImage.Buildpacks[6].Key).To(Equal(settings.Buildpack.ID))
+				Expect(secondImage.Buildpacks[6].Layers).To(HaveKey("assets"))
+
+				container, err = settings.Docker.Container.Run.
+					WithCommand(fmt.Sprintf("ls -alR /layers/%s/assets/public/assets", strings.ReplaceAll(settings.Buildpack.ID, "/", "_"))).
+					Execute(secondImage.ID)
+				Expect(err).NotTo(HaveOccurred())
+
+				containerIDs[container.ID] = struct{}{}
+
+				Expect(secondImage.Buildpacks[6].Layers["assets"].Metadata["built_at"]).NotTo(Equal(firstImage.Buildpacks[6].Layers["assets"].Metadata["built_at"]))
+				Expect(secondImage.Buildpacks[6].Layers["assets"].Metadata["cache_sha"]).NotTo(Equal(firstImage.Buildpacks[6].Layers["assets"].Metadata["cache_sha"]))
+
+				// TODO: why is the image id changing?
+				// Expect(secondImage.ID).To(Equal(firstImage.ID), fmt.Sprintf("%s\n\n%s", firstLogs, secondLogs))
+
+				Expect(secondLogs).NotTo(ContainLines(
+					fmt.Sprintf("  Reusing cached layer /layers/%s/assets", strings.ReplaceAll(settings.Buildpack.ID, "/", "_")),
+				))
+			})
 		})
 	})
 }
