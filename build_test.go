@@ -53,12 +53,6 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		err = os.MkdirAll(filepath.Join(workingDir, "app", "assets"), os.ModePerm)
 		Expect(err).NotTo(HaveOccurred())
 
-		err = os.MkdirAll(filepath.Join(workingDir, "public", "assets"), os.ModePerm)
-		Expect(err).NotTo(HaveOccurred())
-
-		err = os.MkdirAll(filepath.Join(workingDir, "tmp", "assets", "cache"), os.ModePerm)
-		Expect(err).NotTo(HaveOccurred())
-
 		buildProcess = &fakes.BuildProcess{}
 
 		buffer = bytes.NewBuffer(nil)
