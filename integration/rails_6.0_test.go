@@ -130,11 +130,22 @@ func testRails60(t *testing.T, context spec.G, it spec.S) {
 			Expect(firstImage.Buildpacks[6].Layers).To(HaveKey("assets"))
 
 			container, err := settings.Docker.Container.Run.
-				WithCommand(fmt.Sprintf("ls -alR /layers/%s/assets/public/assets", strings.ReplaceAll(settings.Buildpack.ID, "/", "_"))).
+				WithEnv(map[string]string{
+					"PORT":            "8080",
+					"SECRET_KEY_BASE": "some-secret",
+				}).
+				WithPublish("8080").
+				WithPublishAll().
 				Execute(firstImage.ID)
 			Expect(err).NotTo(HaveOccurred())
 
 			containerIDs[container.ID] = struct{}{}
+
+			Eventually(container).Should(BeAvailable())
+
+			response, err := http.Get(fmt.Sprintf("http://localhost:%s", container.HostPort("8080")))
+			Expect(err).NotTo(HaveOccurred())
+			Expect(response.StatusCode).To(Equal(http.StatusOK))
 
 			secondImage, secondLogs, err := build.Execute(name, source)
 			Expect(err).NotTo(HaveOccurred(), secondLogs.String)
@@ -146,11 +157,22 @@ func testRails60(t *testing.T, context spec.G, it spec.S) {
 			Expect(secondImage.Buildpacks[6].Layers).To(HaveKey("assets"))
 
 			container, err = settings.Docker.Container.Run.
-				WithCommand(fmt.Sprintf("ls -alR /layers/%s/assets/public/assets", strings.ReplaceAll(settings.Buildpack.ID, "/", "_"))).
+				WithEnv(map[string]string{
+					"PORT":            "8080",
+					"SECRET_KEY_BASE": "some-secret",
+				}).
+				WithPublish("8080").
+				WithPublishAll().
 				Execute(secondImage.ID)
 			Expect(err).NotTo(HaveOccurred())
 
 			containerIDs[container.ID] = struct{}{}
+
+			Eventually(container).Should(BeAvailable())
+
+			response, err = http.Get(fmt.Sprintf("http://localhost:%s", container.HostPort("8080")))
+			Expect(err).NotTo(HaveOccurred())
+			Expect(response.StatusCode).To(Equal(http.StatusOK))
 
 			Expect(secondImage.Buildpacks[6].Layers["assets"].Metadata["built_at"]).To(Equal(firstImage.Buildpacks[6].Layers["assets"].Metadata["built_at"]))
 			Expect(secondImage.Buildpacks[6].Layers["assets"].Metadata["cache_sha"]).To(Equal(firstImage.Buildpacks[6].Layers["assets"].Metadata["cache_sha"]))
@@ -180,11 +202,22 @@ func testRails60(t *testing.T, context spec.G, it spec.S) {
 				Expect(firstImage.Buildpacks[6].Layers).To(HaveKey("assets"))
 
 				container, err := settings.Docker.Container.Run.
-					WithCommand(fmt.Sprintf("ls -alR /layers/%s/assets/public/assets", strings.ReplaceAll(settings.Buildpack.ID, "/", "_"))).
+					WithEnv(map[string]string{
+						"PORT":            "8080",
+						"SECRET_KEY_BASE": "some-secret",
+					}).
+					WithPublish("8080").
+					WithPublishAll().
 					Execute(firstImage.ID)
 				Expect(err).NotTo(HaveOccurred())
 
 				containerIDs[container.ID] = struct{}{}
+
+				Eventually(container).Should(BeAvailable())
+
+				response, err := http.Get(fmt.Sprintf("http://localhost:%s", container.HostPort("8080")))
+				Expect(err).NotTo(HaveOccurred())
+				Expect(response.StatusCode).To(Equal(http.StatusOK))
 
 				file, err := os.OpenFile(filepath.Join(source, "app", "javascript", "packs", "application.js"), os.O_APPEND|os.O_RDWR, 0600)
 				Expect(err).NotTo(HaveOccurred())
@@ -204,11 +237,22 @@ func testRails60(t *testing.T, context spec.G, it spec.S) {
 				Expect(secondImage.Buildpacks[6].Layers).To(HaveKey("assets"))
 
 				container, err = settings.Docker.Container.Run.
-					WithCommand(fmt.Sprintf("ls -alR /layers/%s/assets/public/assets", strings.ReplaceAll(settings.Buildpack.ID, "/", "_"))).
+					WithEnv(map[string]string{
+						"PORT":            "8080",
+						"SECRET_KEY_BASE": "some-secret",
+					}).
+					WithPublish("8080").
+					WithPublishAll().
 					Execute(secondImage.ID)
 				Expect(err).NotTo(HaveOccurred())
 
 				containerIDs[container.ID] = struct{}{}
+
+				Eventually(container).Should(BeAvailable())
+
+				response, err = http.Get(fmt.Sprintf("http://localhost:%s", container.HostPort("8080")))
+				Expect(err).NotTo(HaveOccurred())
+				Expect(response.StatusCode).To(Equal(http.StatusOK))
 
 				Expect(secondImage.Buildpacks[6].Layers["assets"].Metadata["built_at"]).NotTo(Equal(firstImage.Buildpacks[6].Layers["assets"].Metadata["built_at"]))
 				Expect(secondImage.Buildpacks[6].Layers["assets"].Metadata["cache_sha"]).NotTo(Equal(firstImage.Buildpacks[6].Layers["assets"].Metadata["cache_sha"]))
