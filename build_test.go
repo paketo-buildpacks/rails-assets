@@ -101,6 +101,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 						"RAILS_ENV.default":                "production",
 						"RAILS_SERVE_STATIC_FILES.default": "true",
 					},
+					ProcessLaunchEnv: map[string]packit.Environment{},
 					Metadata: map[string]interface{}{
 						"built_at":  timeStamp.Format(time.RFC3339Nano),
 						"cache_sha": "some-calculator-sha",
@@ -165,6 +166,7 @@ launch = true
 							"RAILS_ENV.default":                "production",
 							"RAILS_SERVE_STATIC_FILES.default": "true",
 						},
+						ProcessLaunchEnv: map[string]packit.Environment{},
 						Metadata: map[string]interface{}{
 							"built_at":  timeStamp.Format(time.RFC3339Nano),
 							"cache_sha": "some-calculator-sha",
