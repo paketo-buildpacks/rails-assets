@@ -14,15 +14,20 @@ func NewDirectorySetup() DirectorySetup {
 	return DirectorySetup{}
 }
 
-// ResetLocal deletes public/assets and tmp/cache/assets directories. These
-// directories will be replaced by links to directories internal to the
-// "assets" layer that is created by this buildpack.
+// ResetLocal deletes public/assets, public/packs, and tmp/cache/assets
+// directories. These directories will be replaced by links to directories
+// internal to the "assets" layer that is created by this buildpack.
 //
 // Additionally, ResetLocal ensures that the working directory at least
 // contains a public and tmp/cache directory so that these links have a
 // location to be placed into.
 func (DirectorySetup) ResetLocal(workingDir string) error {
 	err := os.RemoveAll(filepath.Join(workingDir, "public", "assets"))
+	if err != nil {
+		return err
+	}
+
+	err = os.RemoveAll(filepath.Join(workingDir, "public", "packs"))
 	if err != nil {
 		return err
 	}
@@ -45,11 +50,16 @@ func (DirectorySetup) ResetLocal(workingDir string) error {
 	return nil
 }
 
-// ResetLayer ensures that the "assets" layer contains public-assets and
-// tmp-cache-assets directories. These directories will hold the results of
-// running the "rails assets:precompile" build process.
+// ResetLayer ensures that the "assets" layer contains public-assets,
+// public-packs, and tmp-cache-assets directories. These directories will hold
+// the results of running the "rails assets:precompile" build process.
 func (DirectorySetup) ResetLayer(layerPath string) error {
 	err := os.MkdirAll(filepath.Join(layerPath, "public-assets"), os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	err = os.MkdirAll(filepath.Join(layerPath, "public-packs"), os.ModePerm)
 	if err != nil {
 		return err
 	}
@@ -69,6 +79,11 @@ func (DirectorySetup) ResetLayer(layerPath string) error {
 // cached and reused on subsequent builds.
 func (DirectorySetup) Link(layerPath, workingDir string) error {
 	err := os.Symlink(filepath.Join(layerPath, "public-assets"), filepath.Join(workingDir, "public", "assets"))
+	if err != nil {
+		return err
+	}
+
+	err = os.Symlink(filepath.Join(layerPath, "public-packs"), filepath.Join(workingDir, "public", "packs"))
 	if err != nil {
 		return err
 	}

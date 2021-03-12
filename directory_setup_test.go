@@ -6,9 +6,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	. "github.com/onsi/gomega"
 	railsassets "github.com/paketo-buildpacks/rails-assets"
 	"github.com/sclevine/spec"
+
+	. "github.com/onsi/gomega"
 )
 
 func testDirectorySetup(t *testing.T, context spec.G, it spec.S) {
@@ -37,28 +38,32 @@ func testDirectorySetup(t *testing.T, context spec.G, it spec.S) {
 	})
 
 	context("ResetLocal", func() {
+		it.Before(func() {
+			Expect(os.MkdirAll(filepath.Join(workingDir, "public", "assets"), os.ModePerm)).To(Succeed())
+			Expect(os.MkdirAll(filepath.Join(workingDir, "public", "packs"), os.ModePerm)).To(Succeed())
+			Expect(os.MkdirAll(filepath.Join(workingDir, "tmp", "cache", "assets"), os.ModePerm)).To(Succeed())
+		})
+
 		it("recreates directories", func() {
 			err := setup.ResetLocal(workingDir)
 			Expect(err).NotTo(HaveOccurred())
 
-			_, err = os.Stat(filepath.Join(workingDir, "public"))
-			Expect(err).NotTo(HaveOccurred())
+			Expect(filepath.Join(workingDir, "public")).To(BeADirectory())
+			Expect(filepath.Join(workingDir, "tmp", "cache")).To(BeADirectory())
 
-			_, err = os.Stat(filepath.Join(workingDir, "tmp", "cache"))
-			Expect(err).NotTo(HaveOccurred())
+			Expect(filepath.Join(workingDir, "public", "assets")).NotTo(BeADirectory())
+			Expect(filepath.Join(workingDir, "public", "packs")).NotTo(BeADirectory())
+			Expect(filepath.Join(workingDir, "tmp", "cache", "assets")).NotTo(BeADirectory())
 		})
 	})
 
 	context("ResetLayer", func() {
 		it("creates the directories", func() {
-			err := setup.ResetLayer(layerPath)
-			Expect(err).NotTo(HaveOccurred())
+			Expect(setup.ResetLayer(layerPath)).To(Succeed())
 
-			_, err = os.Stat(filepath.Join(layerPath, "tmp-cache-assets"))
-			Expect(err).NotTo(HaveOccurred())
-
-			_, err = os.Stat(filepath.Join(layerPath, "public-assets"))
-			Expect(err).NotTo(HaveOccurred())
+			Expect(filepath.Join(layerPath, "tmp-cache-assets")).To(BeADirectory())
+			Expect(filepath.Join(layerPath, "public-assets")).To(BeADirectory())
+			Expect(filepath.Join(layerPath, "public-packs")).To(BeADirectory())
 		})
 	})
 
@@ -82,6 +87,10 @@ func testDirectorySetup(t *testing.T, context spec.G, it spec.S) {
 			link, err = os.Readlink(filepath.Join(workingDir, "public", "assets"))
 			Expect(err).NotTo(HaveOccurred())
 			Expect(link).To(Equal(filepath.Join(layerPath, "public-assets")))
+
+			link, err = os.Readlink(filepath.Join(workingDir, "public", "packs"))
+			Expect(err).NotTo(HaveOccurred())
+			Expect(link).To(Equal(filepath.Join(layerPath, "public-packs")))
 		})
 	})
 }
