@@ -235,7 +235,7 @@ launch = true
 			})
 		})
 
-		context("when there is a vendor/assets directory", func() {
+		context("when there is a app/javascript directory", func() {
 			it.Before(func() {
 				Expect(os.RemoveAll(filepath.Join(workingDir, "app", "assets"))).To(Succeed())
 				Expect(os.MkdirAll(filepath.Join(workingDir, "app", "javascript"), os.ModePerm)).To(Succeed())
