@@ -38,7 +38,7 @@ func (p PrecompileProcess) Execute(workingDir string) error {
 	os.Setenv("RAILS_ENV", "production")
 
 	buffer := bytes.NewBuffer(nil)
-	args := []string{"exec", "rails", "assets:precompile", "assets:clean"}
+	args := []string{"exec", "rails", "assets:precompile", "assets:clean", "-e production"}
 
 	p.logger.Subprocess("Running 'bundle %s'", strings.Join(args, " "))
 	err := p.executable.Execute(pexec.Execution{
