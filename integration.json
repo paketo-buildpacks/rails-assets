@@ -1,5 +1,5 @@
 {
-  "builder": "paketobuildpacks/builder:full",
+  "builder": "paketobuildpacks/builder:buildpackless-full",
   "bundle-install": "github.com/paketo-buildpacks/bundle-install",
   "bundler": "github.com/paketo-buildpacks/bundler",
   "mri": "github.com/paketo-buildpacks/mri",
