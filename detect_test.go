@@ -6,8 +6,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"io/ioutil"
-
 	"github.com/paketo-buildpacks/packit"
 	railsassets "github.com/paketo-buildpacks/rails-assets"
 	"github.com/paketo-buildpacks/rails-assets/fakes"
@@ -27,10 +25,10 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 
 	it.Before(func() {
 		var err error
-		workingDir, err = ioutil.TempDir("", "working-dir")
+		workingDir, err = os.MkdirTemp("", "working-dir")
 		Expect(err).NotTo(HaveOccurred())
 
-		err = ioutil.WriteFile(filepath.Join(workingDir, "Gemfile"), []byte{}, 0600)
+		err = os.WriteFile(filepath.Join(workingDir, "Gemfile"), []byte{}, 0600)
 		Expect(err).NotTo(HaveOccurred())
 
 		gemfileParser = &fakes.Parser{}
@@ -70,7 +68,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 
 			context("when the working directory contains a yarn.lock file", func() {
 				it.Before(func() {
-					Expect(ioutil.WriteFile(filepath.Join(workingDir, "yarn.lock"), nil, 0600)).To(Succeed())
+					Expect(os.WriteFile(filepath.Join(workingDir, "yarn.lock"), nil, 0600)).To(Succeed())
 				})
 
 				it("detects with node_modules", func() {
