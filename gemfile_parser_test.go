@@ -1,7 +1,6 @@
 package railsassets_test
 
 import (
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -20,7 +19,7 @@ func testGemfileParser(t *testing.T, context spec.G, it spec.S) {
 	)
 
 	it.Before(func() {
-		file, err := ioutil.TempFile("", "Gemfile")
+		file, err := os.CreateTemp("", "Gemfile")
 		Expect(err).NotTo(HaveOccurred())
 		defer file.Close()
 
@@ -36,29 +35,24 @@ func testGemfileParser(t *testing.T, context spec.G, it spec.S) {
 	context("Parse", func() {
 		context("when using rails", func() {
 			it("parses correctly", func() {
-				const GEMFILE_CONTENTS = `
-source 'https://rubygems.org' do
+				Expect(os.WriteFile(path, []byte(`source 'https://rubygems.org' do
 	gem 'rails'
 end
-`
-
-				Expect(ioutil.WriteFile(path, []byte(GEMFILE_CONTENTS), 0644)).To(Succeed())
+`), 0600)).To(Succeed())
 
 				hasRails, err := parser.Parse(path)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(hasRails).To(Equal(true))
+				Expect(hasRails).To(BeTrue())
 			})
 		})
 
 		context("when not using rails", func() {
 			it("parses correctly", func() {
-				const GEMFILE_CONTENTS = `source 'https://rubygems.org'`
-
-				Expect(ioutil.WriteFile(path, []byte(GEMFILE_CONTENTS), 0644)).To(Succeed())
+				Expect(os.WriteFile(path, []byte(`source 'https://rubygems.org'`), 0600)).To(Succeed())
 
 				hasRails, err := parser.Parse(path)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(hasRails).To(Equal(false))
+				Expect(hasRails).To(BeFalse())
 			})
 		})
 
@@ -70,7 +64,7 @@ end
 			it("returns all false", func() {
 				hasRails, err := parser.Parse(path)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(hasRails).To(Equal(false))
+				Expect(hasRails).To(BeFalse())
 			})
 		})
 

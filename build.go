@@ -105,6 +105,7 @@ func Build(
 			logger.Process("Reusing cached layer %s", assetsLayer.Path)
 			logger.Break()
 
+			assetsLayer.Launch = true
 			err = environmentSetup.Link(assetsLayer.Path, context.WorkingDir)
 			if err != nil {
 				return packit.BuildResult{}, err
