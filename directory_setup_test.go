@@ -1,7 +1,6 @@
 package railsassets_test
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -23,10 +22,10 @@ func testDirectorySetup(t *testing.T, context spec.G, it spec.S) {
 
 	it.Before(func() {
 		var err error
-		layerPath, err = ioutil.TempDir("", "layers")
+		layerPath, err = os.MkdirTemp("", "layers")
 		Expect(err).NotTo(HaveOccurred())
 
-		workingDir, err = ioutil.TempDir("", "working-dir")
+		workingDir, err = os.MkdirTemp("", "working-dir")
 		Expect(err).NotTo(HaveOccurred())
 
 		setup = railsassets.NewDirectorySetup()
