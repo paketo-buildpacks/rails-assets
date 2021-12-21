@@ -1,9 +1,15 @@
 api = "0.6"
 
 [buildpack]
+  description = "A buildpack for precompiling rails assets"
   homepage = "https://github.com/paketo-buildpacks/rails-assets"
   id = "paketo-buildpacks/rails-assets"
+  keywords = ["ruby", "rails", "assets"]
   name = "Paketo Rails Assets Buildpack"
+
+  [[buildpack.licenses]]
+    type = "Apache-2.0"
+    uri = "https://github.com/paketo-buildpacks/rails-assets/blob/main/LICENSE"
 
 [metadata]
   include-files = ["bin/build", "bin/detect", "bin/run", "buildpack.toml"]
