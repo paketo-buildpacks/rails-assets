@@ -6,8 +6,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/paketo-buildpacks/packit/pexec"
-	"github.com/paketo-buildpacks/packit/scribe"
+	"github.com/paketo-buildpacks/packit/v2/pexec"
+	"github.com/paketo-buildpacks/packit/v2/scribe"
 )
 
 //go:generate faux --interface Executable --output fakes/executable.go
@@ -20,11 +20,11 @@ type Executable interface {
 // PrecompileProcess performs the "rails assets:precompile" build process.
 type PrecompileProcess struct {
 	executable Executable
-	logger     scribe.Logger
+	logger     scribe.Emitter
 }
 
 // NewPrecompileProcess initializes an instance of PrecompileProcess.
-func NewPrecompileProcess(executable Executable, logger scribe.Logger) PrecompileProcess {
+func NewPrecompileProcess(executable Executable, logger scribe.Emitter) PrecompileProcess {
 	return PrecompileProcess{
 		executable: executable,
 		logger:     logger,
@@ -43,8 +43,8 @@ func (p PrecompileProcess) Execute(workingDir string) error {
 	p.logger.Subprocess("Running 'bundle %s'", strings.Join(args, " "))
 	err := p.executable.Execute(pexec.Execution{
 		Args:   args,
-		Stdout: buffer,
-		Stderr: buffer,
+		Stdout: p.logger.ActionWriter,
+		Stderr: p.logger.ActionWriter,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to execute bundle exec output:\n%s\nerror: %s", buffer.String(), err)

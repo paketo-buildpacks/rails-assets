@@ -106,6 +106,8 @@ func testRails60(t *testing.T, context spec.G, it spec.S) {
 			MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, settings.Buildpack.Name)),
 			"  Executing build process",
 			"    Running 'bundle exec rails assets:precompile assets:clean'",
+		))
+		Expect(logs).To(ContainLines(
 			MatchRegexp(`      Completed in ([0-9]*(\.[0-9]*)?[a-z]+)+`),
 			"",
 			"  Configuring launch environment",
