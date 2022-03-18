@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/paketo-buildpacks/packit"
-	"github.com/paketo-buildpacks/packit/chronos"
-	"github.com/paketo-buildpacks/packit/scribe"
+	"github.com/paketo-buildpacks/packit/v2"
+	"github.com/paketo-buildpacks/packit/v2/chronos"
+	"github.com/paketo-buildpacks/packit/v2/scribe"
 	railsassets "github.com/paketo-buildpacks/rails-assets"
 	"github.com/paketo-buildpacks/rails-assets/fakes"
 	"github.com/sclevine/spec"
@@ -55,7 +55,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		buildProcess = &fakes.BuildProcess{}
 
 		buffer = bytes.NewBuffer(nil)
-		logger := scribe.NewLogger(buffer)
+		logger := scribe.NewEmitter(buffer)
 
 		timeStamp = time.Now()
 		clock = chronos.NewClock(func() time.Time {

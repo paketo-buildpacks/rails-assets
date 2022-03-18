@@ -5,9 +5,9 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/paketo-buildpacks/packit"
-	"github.com/paketo-buildpacks/packit/chronos"
-	"github.com/paketo-buildpacks/packit/scribe"
+	"github.com/paketo-buildpacks/packit/v2"
+	"github.com/paketo-buildpacks/packit/v2/chronos"
+	"github.com/paketo-buildpacks/packit/v2/scribe"
 )
 
 const (
@@ -67,7 +67,7 @@ func Build(
 	buildProcess BuildProcess,
 	calculator Calculator,
 	environmentSetup EnvironmentSetup,
-	logger scribe.Logger,
+	logger scribe.Emitter,
 	clock chronos.Clock,
 ) packit.BuildFunc {
 	return func(context packit.BuildContext) (packit.BuildResult, error) {
@@ -78,6 +78,7 @@ func Build(
 			return packit.BuildResult{}, err
 		}
 
+		logger.Debug.Process("Checking checksum paths for the following directories:")
 		var checksumPaths []string
 		for _, path := range []string{
 			filepath.Join(context.WorkingDir, "app", "assets"),
@@ -86,26 +87,32 @@ func Build(
 			filepath.Join(context.WorkingDir, "app", "javascript"),
 		} {
 			if _, err := os.Stat(path); err == nil {
+				logger.Debug.Subprocess(path)
 				checksumPaths = append(checksumPaths, path)
 			}
 		}
+		logger.Debug.Break()
 
 		sum, err := calculator.Sum(checksumPaths...)
 		if err != nil {
 			return packit.BuildResult{}, err
 		}
 
+		logger.Debug.Process("Getting the layer associated with Rails assets:")
 		assetsLayer, err := context.Layers.Get(LayerNameAssets)
 		if err != nil {
 			return packit.BuildResult{}, err
 		}
+		logger.Debug.Subprocess(assetsLayer.Path)
+		logger.Debug.Break()
 
 		previousSum, _ := assetsLayer.Metadata["cache_sha"].(string)
 		if sum == previousSum {
 			logger.Process("Reusing cached layer %s", assetsLayer.Path)
-			logger.Break()
 
 			assetsLayer.Launch = true
+			logger.Debug.Process("Symlinking asset directories to %s", context.WorkingDir)
+			logger.Break()
 			err = environmentSetup.Link(assetsLayer.Path, context.WorkingDir)
 			if err != nil {
 				return packit.BuildResult{}, err
@@ -121,6 +128,7 @@ func Build(
 			return packit.BuildResult{}, err
 		}
 
+		logger.Debug.Process("Symlinking asset directories to %s", context.WorkingDir)
 		err = environmentSetup.Link(assetsLayer.Path, context.WorkingDir)
 		if err != nil {
 			return packit.BuildResult{}, err
@@ -140,10 +148,7 @@ func Build(
 		assetsLayer.Launch = true
 		assetsLayer.LaunchEnv.Default("RAILS_ENV", "production")
 		assetsLayer.LaunchEnv.Default("RAILS_SERVE_STATIC_FILES", "true")
-
-		logger.Process("Configuring launch environment")
-		logger.Subprocess("%s", scribe.NewFormattedMapFromEnvironment(assetsLayer.LaunchEnv))
-		logger.Break()
+		logger.EnvironmentVariables(assetsLayer)
 
 		assetsLayer.Metadata = map[string]interface{}{
 			"built_at":  clock.Now().Format(time.RFC3339Nano),

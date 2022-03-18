@@ -75,6 +75,7 @@ func testRails50(t *testing.T, context spec.G, it spec.S) {
 			WithEnv(map[string]string{
 				"PORT":            "8080",
 				"SECRET_KEY_BASE": "some-secret",
+				"BP_LOG_LEVEL":    "DEBUG",
 			}).
 			WithPublish("8080").
 			WithPublishAll().
@@ -103,8 +104,20 @@ func testRails50(t *testing.T, context spec.G, it spec.S) {
 
 		Expect(logs).To(ContainLines(
 			MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, settings.Buildpack.Name)),
+			"  Checking checksum paths for the following directories:",
+			"    /workspace/app/assets",
+			"    /workspace/lib/assets",
+			"    /workspace/vendor/assets",
+			"    /workspace/app/javascript",
+			"",
+			"  Getting the layer associated with Rails assets:",
+			fmt.Sprintf("    /layers/%s/assets", strings.ReplaceAll(settings.Buildpack.ID, "/", "_")),
+			"",
+			"  Symlinking asset directories to /workspace",
 			"  Executing build process",
 			"    Running 'bundle exec rails assets:precompile assets:clean'",
+		))
+		Expect(logs).To(ContainLines(
 			MatchRegexp(`      Completed in ([0-9]*(\.[0-9]*)?[a-z]+)+`),
 			"",
 			"  Configuring launch environment",

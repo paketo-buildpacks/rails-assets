@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/paketo-buildpacks/packit"
+	"github.com/paketo-buildpacks/packit/v2"
 	railsassets "github.com/paketo-buildpacks/rails-assets"
 	"github.com/paketo-buildpacks/rails-assets/fakes"
 	"github.com/sclevine/spec"
