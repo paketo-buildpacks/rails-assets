@@ -13,6 +13,7 @@ import (
 	"github.com/sclevine/spec/report"
 
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/format"
 )
 
 var settings struct {
@@ -64,6 +65,10 @@ var settings struct {
 
 func TestIntegration(t *testing.T) {
 	Expect := NewWithT(t).Expect
+
+	// Do not truncate Gomega matcher output
+	// The buildpack output text can be large and we often want to see all of it.
+	format.MaxLength = 0
 
 	root, err := filepath.Abs("./..")
 	Expect(err).NotTo(HaveOccurred())
@@ -123,5 +128,6 @@ func TestIntegration(t *testing.T) {
 	suite := spec.New("Integration", spec.Parallel(), spec.Report(report.Terminal{}))
 	suite("Rails5.0", testRails50)
 	suite("Rails6.0", testRails60)
+	suite("ReusingLayerRebuild", testReusingLayerRebuild)
 	suite.Run(t)
 }

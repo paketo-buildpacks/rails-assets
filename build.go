@@ -151,7 +151,6 @@ func Build(
 		logger.EnvironmentVariables(assetsLayer)
 
 		assetsLayer.Metadata = map[string]interface{}{
-			"built_at":  clock.Now().Format(time.RFC3339Nano),
 			"cache_sha": sum,
 		}
 

@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-	"time"
 
 	"github.com/paketo-buildpacks/packit/v2"
 	"github.com/paketo-buildpacks/packit/v2/chronos"
@@ -27,7 +26,6 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		workingDir string
 		cnbDir     string
 		buffer     *bytes.Buffer
-		timeStamp  time.Time
 
 		clock chronos.Clock
 
@@ -57,10 +55,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		buffer = bytes.NewBuffer(nil)
 		logger := scribe.NewEmitter(buffer)
 
-		timeStamp = time.Now()
-		clock = chronos.NewClock(func() time.Time {
-			return timeStamp
-		})
+		clock = chronos.DefaultClock
 
 		calculator = &fakes.Calculator{}
 		calculator.SumCall.Returns.String = "some-calculator-sha"
@@ -102,7 +97,6 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 					},
 					ProcessLaunchEnv: map[string]packit.Environment{},
 					Metadata: map[string]interface{}{
-						"built_at":  timeStamp.Format(time.RFC3339Nano),
 						"cache_sha": "some-calculator-sha",
 					},
 				},
@@ -121,11 +115,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 	context("when checksum matches", func() {
 		it.Before(func() {
-			err := os.WriteFile(filepath.Join(layersDir, fmt.Sprintf("%s.toml", railsassets.LayerNameAssets)), []byte(fmt.Sprintf(`
+			err := os.WriteFile(filepath.Join(layersDir, fmt.Sprintf("%s.toml", railsassets.LayerNameAssets)), []byte(`
 [metadata]
 	cache_sha = "some-calculator-sha"
-	built_at = "%s"
-			`, timeStamp.Format(time.RFC3339Nano))), 0600)
+			`), 0600)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(os.MkdirAll(filepath.Join(layersDir, "assets", "env.launch"), os.ModePerm)).To(Succeed())
@@ -165,7 +158,6 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 						},
 						ProcessLaunchEnv: map[string]packit.Environment{},
 						Metadata: map[string]interface{}{
-							"built_at":  timeStamp.Format(time.RFC3339Nano),
 							"cache_sha": "some-calculator-sha",
 						},
 					},
