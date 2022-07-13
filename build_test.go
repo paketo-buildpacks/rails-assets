@@ -94,6 +94,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 					LaunchEnv: packit.Environment{
 						"RAILS_ENV.default":                "production",
 						"RAILS_SERVE_STATIC_FILES.default": "true",
+						"RAILS_LOG_TO_STDOUT.default":      "true",
 					},
 					ProcessLaunchEnv: map[string]packit.Environment{},
 					Metadata: map[string]interface{}{
