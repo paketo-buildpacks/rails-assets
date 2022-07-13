@@ -111,6 +111,7 @@ func testReusingLayerRebuild(t *testing.T, context spec.G, it spec.S) {
 			Expect(logs).To(ContainLines(
 				"  Configuring launch environment",
 				`    RAILS_ENV                -> "production"`,
+				`    RAILS_LOG_TO_STDOUT      -> "true"`,
 				`    RAILS_SERVE_STATIC_FILES -> "true"`,
 			))
 
@@ -251,6 +252,7 @@ func testReusingLayerRebuild(t *testing.T, context spec.G, it spec.S) {
 			Expect(logs).To(ContainLines(
 				"  Configuring launch environment",
 				`    RAILS_ENV                -> "production"`,
+				`    RAILS_LOG_TO_STDOUT      -> "true"`,
 				`    RAILS_SERVE_STATIC_FILES -> "true"`,
 			))
 
@@ -306,6 +308,7 @@ func testReusingLayerRebuild(t *testing.T, context spec.G, it spec.S) {
 			Expect(logs).To(ContainLines(
 				"  Configuring launch environment",
 				`    RAILS_ENV                -> "production"`,
+				`    RAILS_LOG_TO_STDOUT      -> "true"`,
 				`    RAILS_SERVE_STATIC_FILES -> "true"`,
 			))
 

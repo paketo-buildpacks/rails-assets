@@ -61,6 +61,7 @@ type EnvironmentSetup interface {
 //      * RAILS_SERVE_STATIC_FILES : configure Rails to serve static files
 //      itself instead of expecting that a file server like NGINX will serve
 //      them
+//      * RAILS_LOG_TO_STDOUT=true : Rails will log to stdout
 //   7. Attach build metadata onto the new "assets" layer so that it can be
 //   referenced in future builds.
 func Build(
@@ -148,6 +149,7 @@ func Build(
 		assetsLayer.Launch = true
 		assetsLayer.LaunchEnv.Default("RAILS_ENV", "production")
 		assetsLayer.LaunchEnv.Default("RAILS_SERVE_STATIC_FILES", "true")
+		assetsLayer.LaunchEnv.Default("RAILS_LOG_TO_STDOUT", "true")
 		logger.EnvironmentVariables(assetsLayer)
 
 		assetsLayer.Metadata = map[string]interface{}{
