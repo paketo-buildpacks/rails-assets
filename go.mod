@@ -17,8 +17,8 @@ require (
 	github.com/paketo-buildpacks/packit/v2 v2.3.1
 	github.com/sclevine/spec v1.4.0
 	github.com/sirupsen/logrus v1.9.0 // indirect
-	golang.org/x/net v0.0.0-20220802222814-0bcc04d9c69b // indirect
+	golang.org/x/net v0.0.0-20220805013720-a33c5aa5df48 // indirect
 	golang.org/x/sys v0.0.0-20220804214406-8e32c043e418 // indirect
-	google.golang.org/genproto v0.0.0-20220804142021-4e6b2dfa6612 // indirect
+	google.golang.org/genproto v0.0.0-20220805133916-01dd62135a58 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 )
