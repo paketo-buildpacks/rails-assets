@@ -1897,8 +1897,8 @@ github.com/paketo-buildpacks/occam v0.12.0 h1:+zwf5r5HwjAeC1KspW+CWc+JKsizp18cXM
 github.com/paketo-buildpacks/occam v0.12.0/go.mod h1:nhESvP7sWbuQPBoA2M4FLdxtllmEOeHRkCCGhKodoq0=
 github.com/paketo-buildpacks/packit/v2 v2.1.0/go.mod h1:Ud1X7f9O6e4eGPZlY3pj0jnSa9oDK2L/ghvjmarTLSA=
 github.com/paketo-buildpacks/packit/v2 v2.3.1/go.mod h1:b+edypdSKl/MS4IZGBSCTWXC+npvM2Z21PC+7mL/xjc=
-github.com/paketo-buildpacks/packit/v2 v2.4.0 h1:+N1IzK3TTJvVP82IINy8BIOqkGcpdvTMQ5SjAVAOCak=
-github.com/paketo-buildpacks/packit/v2 v2.4.0/go.mod h1:S3hEv6hkgHker/agOOAsnCFWljfriAdExzEyadgsOFw=
+github.com/paketo-buildpacks/packit/v2 v2.4.1 h1:McTs+iG5oE/Nvzs4ks4vcK7o9O8q9+zjExBSc36zI4o=
+github.com/paketo-buildpacks/packit/v2 v2.4.1/go.mod h1:S3hEv6hkgHker/agOOAsnCFWljfriAdExzEyadgsOFw=
 github.com/pascaldekloe/goe v0.0.0-20180627143212-57f6aae5913c/go.mod h1:lzWF7FIEvWOWxwDKqyGYQf6ZUaNfKdP144TG7ZOy1lc=
 github.com/pascaldekloe/goe v0.1.0/go.mod h1:lzWF7FIEvWOWxwDKqyGYQf6ZUaNfKdP144TG7ZOy1lc=
 github.com/pborman/uuid v1.2.0/go.mod h1:X/NO0urCmaxf9VXbdlT7C2Yzkj2IKimNn4k+gtPdI/k=
@@ -2738,8 +2738,8 @@ golang.org/x/net v0.0.0-20220520000938-2e3eb7b945c2/go.mod h1:CfG3xpIq0wQ8r1q4Su
 golang.org/x/net v0.0.0-20220524220425-1d687d428aca/go.mod h1:CfG3xpIq0wQ8r1q4Su4UZFWDARRcnwPjda9FqA0JpMk=
 golang.org/x/net v0.0.0-20220607020251-c690dde0001d/go.mod h1:XRhObCWvk6IyKnWLug+ECip1KBveYUHfp+8e9klMJ9c=
 golang.org/x/net v0.0.0-20220624214902-1bab6f366d9e/go.mod h1:XRhObCWvk6IyKnWLug+ECip1KBveYUHfp+8e9klMJ9c=
-golang.org/x/net v0.0.0-20220805013720-a33c5aa5df48 h1:N9Vc/rorQUDes6B9CNdIxAn5jODGj2wzfrei2x4wNj4=
-golang.org/x/net v0.0.0-20220805013720-a33c5aa5df48/go.mod h1:YDH+HFinaLZZlnHAfSS6ZXJJ9M9t4Dl22yv3iI2vPwk=
+golang.org/x/net v0.0.0-20220809184613-07c6da5e1ced h1:3dYNDff0VT5xj+mbj2XucFst9WKk6PdGOrb9n+SbIvw=
+golang.org/x/net v0.0.0-20220809184613-07c6da5e1ced/go.mod h1:YDH+HFinaLZZlnHAfSS6ZXJJ9M9t4Dl22yv3iI2vPwk=
 golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be/go.mod h1:N/0e6XlmueqKjAGxoOufVs8QHGRruUQn6yWY3a++T0U=
 golang.org/x/oauth2 v0.0.0-20181106182150-f42d05182288/go.mod h1:N/0e6XlmueqKjAGxoOufVs8QHGRruUQn6yWY3a++T0U=
 golang.org/x/oauth2 v0.0.0-20190226205417-e64efc72b421/go.mod h1:gOpvHmFTYa4IltrdGE7lF6nIHvwfUNPOp7c8zoXwtLw=
