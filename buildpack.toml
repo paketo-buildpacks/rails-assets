@@ -5,7 +5,7 @@ api = "0.7"
   homepage = "https://github.com/paketo-buildpacks/rails-assets"
   id = "paketo-buildpacks/rails-assets"
   keywords = ["ruby", "rails", "assets"]
-  name = "Paketo Rails Assets Buildpack"
+  name = "Paketo Buildpack for Rails Assets"
 
   [[buildpack.licenses]]
     type = "Apache-2.0"
