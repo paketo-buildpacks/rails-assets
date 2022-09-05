@@ -7,6 +7,7 @@ require (
 	github.com/PuerkitoBio/goquery v1.8.0
 	github.com/containerd/cgroups v1.0.4 // indirect
 	github.com/containerd/containerd v1.6.8 // indirect
+	github.com/docker/go-units v0.5.0 // indirect
 	github.com/moby/sys/mount v0.3.3 // indirect
 	github.com/moby/term v0.0.0-20220808134915-39b0c02b01ae // indirect
 	github.com/onsi/gomega v1.20.2
@@ -16,7 +17,7 @@ require (
 	github.com/sclevine/spec v1.4.0
 	github.com/sirupsen/logrus v1.9.0 // indirect
 	golang.org/x/net v0.0.0-20220826154423-83b083e8dc8b // indirect
-	golang.org/x/sys v0.0.0-20220825204002-c680a09ffe64 // indirect
-	google.golang.org/genproto v0.0.0-20220822174746-9e6da59bd2fc // indirect
+	golang.org/x/sys v0.0.0-20220829200755-d48e67d00261 // indirect
+	google.golang.org/genproto v0.0.0-20220902135211-223410557253 // indirect
 	google.golang.org/grpc v1.49.0 // indirect
 )
