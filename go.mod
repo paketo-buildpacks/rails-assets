@@ -3,7 +3,7 @@ module github.com/paketo-buildpacks/rails-assets
 go 1.16
 
 require (
-	github.com/BurntSushi/toml v1.2.0
+	github.com/BurntSushi/toml v1.2.1
 	github.com/Microsoft/go-winio v0.6.0 // indirect
 	github.com/PuerkitoBio/goquery v1.8.0
 	github.com/docker/docker v20.10.19+incompatible // indirect
