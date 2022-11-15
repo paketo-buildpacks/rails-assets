@@ -40,6 +40,9 @@ func testReusingLayerRebuild(t *testing.T, context spec.G, it spec.S) {
 		pack = occam.NewPack().WithNoColor()
 		imageIDs = map[string]struct{}{}
 		containerIDs = map[string]struct{}{}
+
+		source, err = occam.Source(filepath.Join("testdata", "6.1"))
+		Expect(err).NotTo(HaveOccurred())
 	})
 
 	it.After(func() {
@@ -66,9 +69,6 @@ func testReusingLayerRebuild(t *testing.T, context spec.G, it spec.S) {
 				firstContainer  occam.Container
 				secondContainer occam.Container
 			)
-
-			source, err = occam.Source(filepath.Join("testdata", "6.0"))
-			Expect(err).NotTo(HaveOccurred())
 
 			build := pack.Build.
 				WithPullPolicy("never").
@@ -208,9 +208,6 @@ func testReusingLayerRebuild(t *testing.T, context spec.G, it spec.S) {
 				secondContainer occam.Container
 			)
 
-			source, err = occam.Source(filepath.Join("testdata", "6.0"))
-			Expect(err).NotTo(HaveOccurred())
-
 			build := pack.Build.
 				WithPullPolicy("never").
 				WithBuildpacks(
@@ -274,7 +271,7 @@ func testReusingLayerRebuild(t *testing.T, context spec.G, it spec.S) {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(response.StatusCode).To(Equal(http.StatusOK))
 
-			file, err := os.OpenFile(filepath.Join(source, "app", "javascript", "packs", "application.js"), os.O_APPEND|os.O_RDWR, 0600)
+			file, err := os.OpenFile(filepath.Join(source, "app", "javascript", "application.js"), os.O_APPEND|os.O_RDWR, 0600)
 			Expect(err).NotTo(HaveOccurred())
 
 			_, err = file.WriteString("// HERE IS A COMMENT")

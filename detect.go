@@ -30,10 +30,10 @@ type BuildPlanMetadata struct {
 // detect phase of the buildpack lifecycle.
 //
 // The detection criteria is twofold:
-//   1. An assets directory must be present in the application source code.
-//   These directories include app/assets, lib/assets, vendor/assets, and
-//   app/javascript.
-//   2. The Gemfile must reference the "rails" gem.
+//  1. An assets directory must be present in the application source code.
+//     These directories include app/assets, lib/assets, vendor/assets, and
+//     app/javascript.
+//  2. The Gemfile must reference the "rails" gem.
 //
 // If both of these criteria are met, then the buildpack will require "node",
 // "mri", "bundler", and "gems" as build-time build plan requirements.
@@ -77,12 +77,6 @@ func Detect(gemfileParser Parser) packit.DetectFunc {
 
 		requirements := []packit.BuildPlanRequirement{
 			{
-				Name: "node",
-				Metadata: BuildPlanMetadata{
-					Build: true,
-				},
-			},
-			{
 				Name: "mri",
 				Metadata: BuildPlanMetadata{
 					Build: true,
@@ -105,6 +99,11 @@ func Detect(gemfileParser Parser) packit.DetectFunc {
 		_, err = os.Stat(filepath.Join(context.WorkingDir, "yarn.lock"))
 		if err == nil {
 			requirements = append(requirements, packit.BuildPlanRequirement{
+				Name: "node",
+				Metadata: BuildPlanMetadata{
+					Build: true,
+				},
+			}, packit.BuildPlanRequirement{
 				Name: "node_modules",
 				Metadata: BuildPlanMetadata{
 					Build: true,

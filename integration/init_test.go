@@ -65,9 +65,7 @@ var settings struct {
 
 func TestIntegration(t *testing.T) {
 	Expect := NewWithT(t).Expect
-
-	// Do not truncate Gomega matcher output
-	// The buildpack output text can be large and we often want to see all of it.
+	SetDefaultEventuallyTimeout(30 * time.Second)
 	format.MaxLength = 0
 
 	root, err := filepath.Abs("./..")
@@ -120,14 +118,12 @@ func TestIntegration(t *testing.T) {
 		Execute(settings.Config.YarnInstall)
 	Expect(err).NotTo(HaveOccurred())
 
-	SetDefaultEventuallyTimeout(30 * time.Second)
-
 	settings.Pack = occam.NewPack().WithVerbose()
 	settings.Docker = occam.NewDocker()
 
 	suite := spec.New("Integration", spec.Parallel(), spec.Report(report.Terminal{}))
-	suite("Rails5.0", testRails50)
-	suite("Rails6.0", testRails60)
+	suite("Rails6.1", testRails61)
+	suite("Rails7.0", testRails70)
 	suite("ReusingLayerRebuild", testReusingLayerRebuild)
 	suite.Run(t)
 }

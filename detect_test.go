@@ -58,7 +58,6 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 				Expect(result.Plan).To(Equal(packit.BuildPlan{
 					Provides: []packit.BuildPlanProvision{},
 					Requires: []packit.BuildPlanRequirement{
-						{Name: "node", Metadata: railsassets.BuildPlanMetadata{Build: true}},
 						{Name: "mri", Metadata: railsassets.BuildPlanMetadata{Build: true}},
 						{Name: "bundler", Metadata: railsassets.BuildPlanMetadata{Build: true}},
 						{Name: "gems", Metadata: railsassets.BuildPlanMetadata{Build: true}},
@@ -79,10 +78,10 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 					Expect(result.Plan).To(Equal(packit.BuildPlan{
 						Provides: []packit.BuildPlanProvision{},
 						Requires: []packit.BuildPlanRequirement{
-							{Name: "node", Metadata: railsassets.BuildPlanMetadata{Build: true}},
 							{Name: "mri", Metadata: railsassets.BuildPlanMetadata{Build: true}},
 							{Name: "bundler", Metadata: railsassets.BuildPlanMetadata{Build: true}},
 							{Name: "gems", Metadata: railsassets.BuildPlanMetadata{Build: true}},
+							{Name: "node", Metadata: railsassets.BuildPlanMetadata{Build: true}},
 							{Name: "node_modules", Metadata: railsassets.BuildPlanMetadata{Build: true}},
 						},
 					}))
@@ -103,7 +102,6 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 				Expect(result.Plan).To(Equal(packit.BuildPlan{
 					Provides: []packit.BuildPlanProvision{},
 					Requires: []packit.BuildPlanRequirement{
-						{Name: "node", Metadata: railsassets.BuildPlanMetadata{Build: true}},
 						{Name: "mri", Metadata: railsassets.BuildPlanMetadata{Build: true}},
 						{Name: "bundler", Metadata: railsassets.BuildPlanMetadata{Build: true}},
 						{Name: "gems", Metadata: railsassets.BuildPlanMetadata{Build: true}},
@@ -125,7 +123,6 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 				Expect(result.Plan).To(Equal(packit.BuildPlan{
 					Provides: []packit.BuildPlanProvision{},
 					Requires: []packit.BuildPlanRequirement{
-						{Name: "node", Metadata: railsassets.BuildPlanMetadata{Build: true}},
 						{Name: "mri", Metadata: railsassets.BuildPlanMetadata{Build: true}},
 						{Name: "bundler", Metadata: railsassets.BuildPlanMetadata{Build: true}},
 						{Name: "gems", Metadata: railsassets.BuildPlanMetadata{Build: true}},
@@ -147,7 +144,6 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 				Expect(result.Plan).To(Equal(packit.BuildPlan{
 					Provides: []packit.BuildPlanProvision{},
 					Requires: []packit.BuildPlanRequirement{
-						{Name: "node", Metadata: railsassets.BuildPlanMetadata{Build: true}},
 						{Name: "mri", Metadata: railsassets.BuildPlanMetadata{Build: true}},
 						{Name: "bundler", Metadata: railsassets.BuildPlanMetadata{Build: true}},
 						{Name: "gems", Metadata: railsassets.BuildPlanMetadata{Build: true}},
