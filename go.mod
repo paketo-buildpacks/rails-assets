@@ -17,7 +17,7 @@ require (
 	github.com/sclevine/spec v1.4.0
 	github.com/testcontainers/testcontainers-go v0.17.0 // indirect
 	github.com/ulikunitz/xz v0.5.11 // indirect
-	google.golang.org/genproto v0.0.0-20221207170731-23e4bf6bdc37 // indirect
+	google.golang.org/genproto v0.0.0-20221227171554-f9683d7f8bef // indirect
 	gotest.tools/v3 v3.4.0 // indirect
 )
 
