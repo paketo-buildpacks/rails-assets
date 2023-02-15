@@ -35,8 +35,6 @@ func NewPrecompileProcess(executable Executable, logger scribe.Emitter) Precompi
 // process. If the process fails, the error message will include the entire
 // output of the child process.
 func (p PrecompileProcess) Execute(workingDir string) error {
-	os.Setenv("RAILS_ENV", "production")
-
 	buffer := bytes.NewBuffer(nil)
 	args := []string{"exec", "rails", "assets:precompile", "assets:clean"}
 
@@ -45,6 +43,7 @@ func (p PrecompileProcess) Execute(workingDir string) error {
 		Args:   args,
 		Stdout: p.logger.ActionWriter,
 		Stderr: p.logger.ActionWriter,
+		Env:    append(os.Environ(), "RAILS_ENV=production", "SECRET_KEY_BASE=dummy"),
 	})
 	if err != nil {
 		return fmt.Errorf("failed to execute bundle exec output:\n%s\nerror: %s", buffer.String(), err)
