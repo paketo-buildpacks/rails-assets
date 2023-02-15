@@ -64,9 +64,6 @@ func testRails70(t *testing.T, context spec.G, it spec.S) {
 		image, logs, err := settings.Pack.WithVerbose().Build.
 			WithBuildpacks(buildpacks...).
 			WithPullPolicy("never").
-			WithEnv(map[string]string{
-				"SECRET_KEY_BASE": "some-secret",
-			}).
 			Execute(name, source)
 		Expect(err).NotTo(HaveOccurred(), logs.String())
 

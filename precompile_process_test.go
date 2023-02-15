@@ -21,7 +21,6 @@ func testPrecompileProcess(t *testing.T, context spec.G, it spec.S) {
 	context("Execute", func() {
 		var (
 			workingDir string
-			path       string
 			executions []pexec.Execution
 			executable *fakes.Executable
 
@@ -41,17 +40,12 @@ func testPrecompileProcess(t *testing.T, context spec.G, it spec.S) {
 				return nil
 			}
 
-			path = os.Getenv("PATH")
-			os.Setenv("PATH", "/some/bin")
-
 			logger := scribe.NewEmitter(bytes.NewBuffer(nil))
 
 			precompileProcess = railsassets.NewPrecompileProcess(executable, logger)
 		})
 
 		it.After(func() {
-			os.Setenv("PATH", path)
-
 			Expect(os.RemoveAll(workingDir)).To(Succeed())
 		})
 
@@ -61,6 +55,8 @@ func testPrecompileProcess(t *testing.T, context spec.G, it spec.S) {
 
 			Expect(executions).To(HaveLen(1))
 			Expect(executions[0].Args).To(Equal([]string{"exec", "rails", "assets:precompile", "assets:clean"}))
+			Expect(executions[0].Env).To(ContainElement("RAILS_ENV=production"))
+			Expect(executions[0].Env).To(ContainElement("SECRET_KEY_BASE=dummy"))
 		})
 
 		context("failure cases", func() {
