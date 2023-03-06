@@ -10,6 +10,7 @@ require (
 	github.com/paketo-buildpacks/occam v0.15.1
 	github.com/paketo-buildpacks/packit/v2 v2.8.2
 	github.com/sclevine/spec v1.4.0
+	golang.org/x/net v0.8.0 // indirect
 	gotest.tools/v3 v3.4.0 // indirect
 )
 
