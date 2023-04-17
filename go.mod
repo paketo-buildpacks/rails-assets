@@ -4,6 +4,7 @@ go 1.16
 
 require (
 	github.com/BurntSushi/toml v1.2.1
+	github.com/Masterminds/semver/v3 v3.2.1 // indirect
 	github.com/PuerkitoBio/goquery v1.8.1
 	github.com/onsi/gomega v1.27.6
 	github.com/opencontainers/runc v1.1.4 // indirect
