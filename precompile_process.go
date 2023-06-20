@@ -43,11 +43,35 @@ func (p PrecompileProcess) Execute(workingDir string) error {
 		Args:   args,
 		Stdout: p.logger.ActionWriter,
 		Stderr: p.logger.ActionWriter,
-		Env:    append(os.Environ(), "RAILS_ENV=production", "SECRET_KEY_BASE=dummy"),
+		Env:    processPrecompileEnv(os.Environ()),
 	})
 	if err != nil {
 		return fmt.Errorf("failed to execute bundle exec output:\n%s\nerror: %s", buffer.String(), err)
 	}
 
 	return nil
+}
+
+func processPrecompileEnv(env []string) []string {
+	hasRailsEnv := false
+	hasSecretKeyBase := false
+	for _, pair := range env {
+		if strings.HasPrefix(pair, "RAILS_ENV=") {
+			hasRailsEnv = true
+		}
+
+		if strings.HasPrefix(pair, "SECRET_KEY_BASE=") {
+			hasSecretKeyBase = true
+		}
+	}
+
+	if !hasRailsEnv {
+		env = append(env, "RAILS_ENV=production")
+	}
+
+	if !hasSecretKeyBase {
+		env = append(env, "SECRET_KEY_BASE=dummy")
+	}
+
+	return env
 }
