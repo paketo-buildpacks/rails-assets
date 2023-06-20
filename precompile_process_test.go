@@ -25,6 +25,11 @@ func testPrecompileProcess(t *testing.T, context spec.G, it spec.S) {
 			executable *fakes.Executable
 
 			precompileProcess railsassets.PrecompileProcess
+
+			hasRailsEnv      bool
+			hasSecretKeyBase bool
+			railsEnv         string
+			secretKeyBase    string
 		)
 
 		it.Before(func() {
@@ -43,9 +48,20 @@ func testPrecompileProcess(t *testing.T, context spec.G, it spec.S) {
 			logger := scribe.NewEmitter(bytes.NewBuffer(nil))
 
 			precompileProcess = railsassets.NewPrecompileProcess(executable, logger)
+
+			railsEnv, hasRailsEnv = os.LookupEnv("RAILS_ENV")
+			secretKeyBase, hasSecretKeyBase = os.LookupEnv("SECRET_KEY_BASE")
 		})
 
 		it.After(func() {
+			if hasRailsEnv {
+				os.Setenv("RAILS_ENV", railsEnv)
+			}
+
+			if hasSecretKeyBase {
+				os.Setenv("SECRET_KEY_BASE", secretKeyBase)
+			}
+
 			Expect(os.RemoveAll(workingDir)).To(Succeed())
 		})
 
@@ -57,6 +73,28 @@ func testPrecompileProcess(t *testing.T, context spec.G, it spec.S) {
 			Expect(executions[0].Args).To(Equal([]string{"exec", "rails", "assets:precompile", "assets:clean"}))
 			Expect(executions[0].Env).To(ContainElement("RAILS_ENV=production"))
 			Expect(executions[0].Env).To(ContainElement("SECRET_KEY_BASE=dummy"))
+		})
+
+		it("runs the bundle exec assets:precompile process while respecting RAILS_ENV", func() {
+			os.Setenv("RAILS_ENV", "staging")
+			err := precompileProcess.Execute(workingDir)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(executions).To(HaveLen(1))
+			Expect(executions[0].Args).To(Equal([]string{"exec", "rails", "assets:precompile", "assets:clean"}))
+			Expect(executions[0].Env).To(ContainElement("RAILS_ENV=staging"))
+			Expect(executions[0].Env).To(ContainElement("SECRET_KEY_BASE=dummy"))
+		})
+
+		it("runs the bundle exec assets:precompile process while respecting SECRET_KEY_BASE", func() {
+			os.Setenv("SECRET_KEY_BASE", "dummy2")
+			err := precompileProcess.Execute(workingDir)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(executions).To(HaveLen(1))
+			Expect(executions[0].Args).To(Equal([]string{"exec", "rails", "assets:precompile", "assets:clean"}))
+			Expect(executions[0].Env).To(ContainElement("RAILS_ENV=production"))
+			Expect(executions[0].Env).To(ContainElement("SECRET_KEY_BASE=dummy2"))
 		})
 
 		context("failure cases", func() {
