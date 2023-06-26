@@ -25,11 +25,6 @@ func testPrecompileProcess(t *testing.T, context spec.G, it spec.S) {
 			executable *fakes.Executable
 
 			precompileProcess railsassets.PrecompileProcess
-
-			hasRailsEnv      bool
-			hasSecretKeyBase bool
-			railsEnv         string
-			secretKeyBase    string
 		)
 
 		it.Before(func() {
@@ -48,20 +43,9 @@ func testPrecompileProcess(t *testing.T, context spec.G, it spec.S) {
 			logger := scribe.NewEmitter(bytes.NewBuffer(nil))
 
 			precompileProcess = railsassets.NewPrecompileProcess(executable, logger)
-
-			railsEnv, hasRailsEnv = os.LookupEnv("RAILS_ENV")
-			secretKeyBase, hasSecretKeyBase = os.LookupEnv("SECRET_KEY_BASE")
 		})
 
 		it.After(func() {
-			if hasRailsEnv {
-				os.Setenv("RAILS_ENV", railsEnv)
-			}
-
-			if hasSecretKeyBase {
-				os.Setenv("SECRET_KEY_BASE", secretKeyBase)
-			}
-
 			Expect(os.RemoveAll(workingDir)).To(Succeed())
 		})
 
