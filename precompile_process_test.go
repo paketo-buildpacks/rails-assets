@@ -75,9 +75,16 @@ func testPrecompileProcess(t *testing.T, context spec.G, it spec.S) {
 				Expect(executions[0].Env).To(ContainElement("RAILS_ENV=staging"))
 				Expect(executions[0].Env).To(ContainElement("SECRET_KEY_BASE=dummy"))
 			})
+		})
 
+	        context("when a user sets their own SECRET_KEY_BASE", func() {
+			it.Before(func() {
+				Expect(os.Setenv("SECRET_KEY_BASE", "dummy2")).To(Succeed())
+			})
+			it.After(func() {
+				Expect(os.Unsetenv("SECRET_KEY_BASE")).To(Succeed())
+			})
 			it("runs the bundle exec assets:precompile process while respecting SECRET_KEY_BASE", func() {
-				os.Setenv("SECRET_KEY_BASE", "dummy2")
 				err := precompileProcess.Execute(workingDir)
 				Expect(err).NotTo(HaveOccurred())
 	
