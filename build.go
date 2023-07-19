@@ -45,10 +45,11 @@ type EnvironmentSetup interface {
 //
 // Build will perform the following steps to execute its build process:
 //   1. Reset the local working directory locations that will be modified by
-//   the buildpack. These locations include public/assets and tmp/cache.
+//   the buildpack. These locations include public/assets and tmp/cache and all
+//   extra directories defined by the user.
 //   2. Calculate a checksum of the asset directories that appear in the
 //   working directory. These directories include app/assets, lib/assets,
-//   vendor/assets, and app/javascript.
+//   vendor/assets, app/javascript, and the user defined checksum directories.
 //   3. Compare the calculated checksum against the recorded value on the
 //   "assets" layer metadata.
 //   3a. If the checksum matches the recorded value, the build process
@@ -81,12 +82,20 @@ func Build(
 
 		logger.Debug.Process("Checking checksum paths for the following directories:")
 		var checksumPaths []string
-		for _, path := range []string{
+
+		paths := []string{
 			filepath.Join(context.WorkingDir, "app", "assets"),
 			filepath.Join(context.WorkingDir, "lib", "assets"),
 			filepath.Join(context.WorkingDir, "vendor", "assets"),
 			filepath.Join(context.WorkingDir, "app", "javascript"),
-		} {
+		}
+
+		extraPaths := filepath.SplitList(os.Getenv("BP_RAILS_ASSETS_EXTRA_SOURCE_PATHS"))
+		for _, path := range extraPaths {
+			paths = append(paths, filepath.Join(context.WorkingDir, filepath.Clean(path)))
+		}
+
+		for _, path := range paths {
 			if _, err := os.Stat(path); err == nil {
 				logger.Debug.Subprocess(path)
 				checksumPaths = append(checksumPaths, path)
