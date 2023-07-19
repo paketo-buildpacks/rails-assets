@@ -19,3 +19,30 @@ The options for this setting are:
 ```shell
 $BP_LOG_LEVEL="DEBUG"
 ```
+
+## Configuring Exta Assets Directories
+
+By default, the `assets:precompile` command reads assets from a set of specific application paths, such as
+`app/assets`, `app/javascript`, `lib/assets` and `vendor/assets`. These directories contain the
+source files that need to be precompiled and optimized for production use. The precompiled assets
+resulted from running this command are then placed in different directories, such
+as `public/assets`, `public/packs` and `tmp/cache/assets`.
+
+Any gem can override the behavior of the `assets:precompile` command, and use different directories
+to either read source assets or write the precompilation results. It is possible to set a list of
+additional source directories using the `$BP_RAILS_ASSETS_EXTRA_SOURCE_PATHS` environment variable.
+In the same way, to set a list of additional destination paths, use `$BP_RAILS_ASSETS_EXTRA_DESTINATION_PATHS`.
+Both variables have the same notation of the `$PATH` system variable.
+
+```bash
+# adds app/my_gem/assets and lib/other_gem/assets to
+# the list of paths containing assets that need precompilation
+BP_RAILS_ASSETS_EXTRA_SOURCE_PATHS="app/my_gem/assets:lib/other_gem/assets"
+
+# adds public/my_gem and public/other_gem to
+# the list of paths with assets resulting from the
+# precompilation process
+BP_RAILS_ASSETS_EXTRA_DESTINATION_PATHS="public/my_gem:public/other_gem"
+```
+
+Like the `$BP_LOG_LEVEL`, you can set those variables either directly with pack cli or using a `project.toml` file.

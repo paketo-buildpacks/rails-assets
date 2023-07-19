@@ -250,6 +250,36 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 		})
 
+		context("when there are extra assets directories", func() {
+			it.Before(func() {
+				os.Setenv("BP_RAILS_ASSETS_EXTRA_SOURCE_PATHS", "custom/assets")
+				Expect(os.RemoveAll(filepath.Join(workingDir, "app", "assets"))).To(Succeed())
+				Expect(os.MkdirAll(filepath.Join(workingDir, "custom", "assets"), os.ModePerm)).To(Succeed())
+			})
+
+			it.After(func() {
+				os.Unsetenv("BP_RAILS_ASSETS_EXTRA_SOURCE_PATHS")
+			})
+
+			it("uses that directory to calculate the checksum", func() {
+				_, err := build(packit.BuildContext{
+					WorkingDir: workingDir,
+					CNBPath:    cnbDir,
+					Stack:      "some-stack",
+					BuildpackInfo: packit.BuildpackInfo{
+						Name:    "Some Buildpack",
+						Version: "some-version",
+					},
+					Layers: packit.Layers{Path: layersDir},
+				})
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(calculator.SumCall.Receives.Paths).To(Equal([]string{
+					filepath.Join(workingDir, "custom", "assets"),
+				}))
+			})
+		})
+
 		context("failure cases", func() {
 			context("when environment linking fails", func() {
 				it.Before(func() {
