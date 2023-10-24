@@ -7,7 +7,7 @@ require (
 	github.com/PuerkitoBio/goquery v1.8.1
 	github.com/onsi/gomega v1.28.1
 	github.com/paketo-buildpacks/occam v0.17.0
-	github.com/paketo-buildpacks/packit/v2 v2.11.0
+	github.com/paketo-buildpacks/packit/v2 v2.12.0
 	github.com/sclevine/spec v1.4.0
 	gotest.tools/v3 v3.5.1 // indirect
 )
