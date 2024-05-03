@@ -2744,8 +2744,8 @@ github.com/paketo-buildpacks/occam v0.18.5 h1:qL0ZhUuOuOw1dhBjEdtyD6ql1KLRVfxbUQ
 github.com/paketo-buildpacks/occam v0.18.5/go.mod h1:7zPy6gwW96OIclo80s9aR730mDTl40jKzJTkKVDTshw=
 github.com/paketo-buildpacks/packit/v2 v2.6.1/go.mod h1:iBArWOfC5xZQF01o+zwnVKS+/hUBuFG+O1jCvzqBujs=
 github.com/paketo-buildpacks/packit/v2 v2.12.0/go.mod h1:sf8X7/fH6xJ3TzZ3KLCmgE10JX7P+CYgfrWrr8N/iU0=
-github.com/paketo-buildpacks/packit/v2 v2.13.0 h1:NV9UzFzdnjChjCmqiE9ucv557r1uL37vd/0gP3BQ9MU=
-github.com/paketo-buildpacks/packit/v2 v2.13.0/go.mod h1:GEot9fiHSAb/k1/OD8hLoSmQEWIQTI64kVttQjI/iv0=
+github.com/paketo-buildpacks/packit/v2 v2.14.0 h1:QqdZlK3kZlmVTJlMZ0YBmG3H02686M0GiQquDTvrySE=
+github.com/paketo-buildpacks/packit/v2 v2.14.0/go.mod h1:OYBmLxWPUVrDB0ayrQAMF0cEQxmRZkU/mvFD13lm/GE=
 github.com/pascaldekloe/goe v0.0.0-20180627143212-57f6aae5913c/go.mod h1:lzWF7FIEvWOWxwDKqyGYQf6ZUaNfKdP144TG7ZOy1lc=
 github.com/pascaldekloe/goe v0.1.0/go.mod h1:lzWF7FIEvWOWxwDKqyGYQf6ZUaNfKdP144TG7ZOy1lc=
 github.com/pborman/uuid v1.2.0/go.mod h1:X/NO0urCmaxf9VXbdlT7C2Yzkj2IKimNn4k+gtPdI/k=
