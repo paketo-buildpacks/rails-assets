@@ -9,7 +9,7 @@ require (
 	github.com/PuerkitoBio/goquery v1.9.2
 	github.com/onsi/gomega v1.34.1
 	github.com/paketo-buildpacks/occam v0.18.7
-	github.com/paketo-buildpacks/packit/v2 v2.14.0
+	github.com/paketo-buildpacks/packit/v2 v2.14.1
 	github.com/sclevine/spec v1.4.0
 )
 
@@ -46,7 +46,7 @@ require (
 	github.com/moby/docker-image-spec v1.3.1 // indirect
 	github.com/moby/patternmatcher v0.6.0 // indirect
 	github.com/moby/sys/sequential v0.6.0 // indirect
-	github.com/moby/sys/user v0.2.0 // indirect
+	github.com/moby/sys/user v0.3.0 // indirect
 	github.com/moby/term v0.5.0 // indirect
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
@@ -72,7 +72,7 @@ require (
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56 // indirect
 	golang.org/x/net v0.28.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
-	golang.org/x/sys v0.23.0 // indirect
+	golang.org/x/sys v0.24.0 // indirect
 	golang.org/x/text v0.17.0 // indirect
 	google.golang.org/grpc v1.65.0 // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
