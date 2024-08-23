@@ -1,14 +1,11 @@
 module github.com/paketo-buildpacks/rails-assets
 
 go 1.21
-
-toolchain go1.22.5
-
 require (
 	github.com/BurntSushi/toml v1.4.0
 	github.com/PuerkitoBio/goquery v1.9.2
 	github.com/onsi/gomega v1.34.1
-	github.com/paketo-buildpacks/occam v0.18.7
+	github.com/paketo-buildpacks/occam v0.18.8
 	github.com/paketo-buildpacks/packit/v2 v2.14.2
 	github.com/sclevine/spec v1.4.0
 )
