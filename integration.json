@@ -6,5 +6,6 @@
   "node-engine": "github.com/paketo-buildpacks/node-engine",
   "puma": "github.com/paketo-buildpacks/puma",
   "yarn": "github.com/paketo-buildpacks/yarn",
-  "yarn-install": "github.com/paketo-buildpacks/yarn-install"
+  "yarn-install": "github.com/paketo-buildpacks/yarn-install",
+  "npm-install": "github.com/paketo-buildpacks/npm-install"
 }

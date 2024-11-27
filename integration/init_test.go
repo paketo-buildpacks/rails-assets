@@ -42,6 +42,9 @@ var settings struct {
 		YarnInstall struct {
 			Online string
 		}
+		NpmInstall struct {
+			Online string
+		}
 	}
 
 	Buildpack struct {
@@ -57,6 +60,7 @@ var settings struct {
 		Puma          string `json:"puma"`
 		Yarn          string `json:"yarn"`
 		YarnInstall   string `json:"yarn-install"`
+		NpmInstall    string `json:"npm-install"`
 	}
 
 	Pack   occam.Pack
@@ -116,6 +120,10 @@ func TestIntegration(t *testing.T) {
 
 	settings.Buildpacks.YarnInstall.Online, err = buildpackStore.Get.
 		Execute(settings.Config.YarnInstall)
+	Expect(err).NotTo(HaveOccurred())
+
+	settings.Buildpacks.NpmInstall.Online, err = buildpackStore.Get.
+		Execute(settings.Config.NpmInstall)
 	Expect(err).NotTo(HaveOccurred())
 
 	settings.Pack = occam.NewPack().WithVerbose()
