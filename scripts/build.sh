@@ -74,8 +74,6 @@ function run::build() {
 
         util::print::title "Building run... for platform: ${platform} and arch: ${arch}"
 
-        mkdir -p "${platform}/${arch}/bin"
-
         GOOS=$platform \
         GOARCH=$arch \
         CGO_ENABLED=0 \
@@ -118,8 +116,6 @@ function cmd::build() {
 
         if [[ -f "${src}/main.go" ]]; then
           util::print::title "Building ${name}... for platform: ${platform} and arch: ${arch}"
-
-          mkdir -p "${BUILDPACKDIR}/${platform}/${arch}/bin"
 
           GOOS=$platform \
           GOARCH=$arch \
