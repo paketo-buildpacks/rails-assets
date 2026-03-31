@@ -42,7 +42,7 @@ type BuildPlanMetadata struct {
 // compilation. We can detect this case by the presence of a yarn.lock file. In
 // that case, the buildpack will also require "node_modules" as a build-time
 // build plan requirement.
-func Detect(gemfileParser Parser) packit.DetectFunc {
+func Detect(gemfileParser Parser, nodeLockfileChecker NodeLockfileChecker) packit.DetectFunc {
 	return func(context packit.DetectContext) (packit.DetectResult, error) {
 		hasAssetsDirectory := false
 		for _, path := range []string{
@@ -96,23 +96,24 @@ func Detect(gemfileParser Parser) packit.DetectFunc {
 			},
 		}
 
-		_, err = os.Stat(filepath.Join(context.WorkingDir, "yarn.lock"))
+		var nodeLockfileExists bool
+		nodeLockfileExists, err = nodeLockfileChecker.Check(context.WorkingDir)
 		if err == nil {
-			requirements = append(requirements, packit.BuildPlanRequirement{
-				Name: "node",
-				Metadata: BuildPlanMetadata{
-					Build: true,
-				},
-			}, packit.BuildPlanRequirement{
-				Name: "node_modules",
-				Metadata: BuildPlanMetadata{
-					Build: true,
-				},
-			})
-		} else {
-			if !errors.Is(err, os.ErrNotExist) {
-				return packit.DetectResult{}, fmt.Errorf("failed to stat yarn.lock: %w", err)
+			if nodeLockfileExists {
+				requirements = append(requirements, packit.BuildPlanRequirement{
+					Name: "node",
+					Metadata: BuildPlanMetadata{
+						Build: true,
+					},
+				}, packit.BuildPlanRequirement{
+					Name: "node_modules",
+					Metadata: BuildPlanMetadata{
+						Build: true,
+					},
+				})
 			}
+		} else {
+			return packit.DetectResult{}, err
 		}
 
 		return packit.DetectResult{
