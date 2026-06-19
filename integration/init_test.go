@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 	"time"
 
@@ -84,37 +85,38 @@ func TestIntegration(t *testing.T) {
 	Expect(file.Close()).To(Succeed())
 
 	buildpackStore := occam.NewBuildpackStore()
+	targetedBuildpackStore := buildpackStore.WithTarget("linux/" + runtime.GOARCH)
 
 	settings.Buildpacks.RailsAssets.Online, err = buildpackStore.Get.
 		WithVersion("1.2.3").
 		Execute(root)
 	Expect(err).NotTo(HaveOccurred())
 
-	settings.Buildpacks.BundleInstall.Online, err = buildpackStore.Get.
+	settings.Buildpacks.BundleInstall.Online, err = targetedBuildpackStore.Get.
 		Execute(settings.Config.BundleInstall)
 	Expect(err).NotTo(HaveOccurred())
 
-	settings.Buildpacks.Bundler.Online, err = buildpackStore.Get.
+	settings.Buildpacks.Bundler.Online, err = targetedBuildpackStore.Get.
 		Execute(settings.Config.Bundler)
 	Expect(err).NotTo(HaveOccurred())
 
-	settings.Buildpacks.MRI.Online, err = buildpackStore.Get.
+	settings.Buildpacks.MRI.Online, err = targetedBuildpackStore.Get.
 		Execute(settings.Config.MRI)
 	Expect(err).NotTo(HaveOccurred())
 
-	settings.Buildpacks.NodeEngine.Online, err = buildpackStore.Get.
+	settings.Buildpacks.NodeEngine.Online, err = targetedBuildpackStore.Get.
 		Execute(settings.Config.NodeEngine)
 	Expect(err).NotTo(HaveOccurred())
 
-	settings.Buildpacks.Puma.Online, err = buildpackStore.Get.
+	settings.Buildpacks.Puma.Online, err = targetedBuildpackStore.Get.
 		Execute(settings.Config.Puma)
 	Expect(err).NotTo(HaveOccurred())
 
-	settings.Buildpacks.Yarn.Online, err = buildpackStore.Get.
+	settings.Buildpacks.Yarn.Online, err = targetedBuildpackStore.Get.
 		Execute(settings.Config.Yarn)
 	Expect(err).NotTo(HaveOccurred())
 
-	settings.Buildpacks.YarnInstall.Online, err = buildpackStore.Get.
+	settings.Buildpacks.YarnInstall.Online, err = targetedBuildpackStore.Get.
 		Execute(settings.Config.YarnInstall)
 	Expect(err).NotTo(HaveOccurred())
 
