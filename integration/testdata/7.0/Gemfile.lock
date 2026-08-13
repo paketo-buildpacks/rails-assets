@@ -66,6 +66,8 @@ GEM
       i18n (>= 1.6, < 2)
       minitest (>= 5.1)
       tzinfo (~> 2.0)
+    base64 (0.3.0)
+    bigdecimal (4.1.2)
     bindex (0.8.1)
     builder (3.2.4)
     concurrent-ruby (1.1.10)
@@ -84,6 +86,7 @@ GEM
     io-console (0.5.11)
     irb (1.4.2)
       reline (>= 0.3.0)
+    logger (1.7.0)
     loofah (2.19.0)
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
@@ -93,6 +96,7 @@ GEM
     method_source (1.0.0)
     mini_mime (1.1.2)
     minitest (5.16.3)
+    mutex_m (0.3.0)
     net-imap (0.3.1)
       net-protocol
     net-pop (0.1.2)
@@ -106,6 +110,7 @@ GEM
       racc (~> 1.4)
     nokogiri (1.13.9-x86_64-linux)
       racc (~> 1.4)
+    ostruct (0.6.3)
     puma (5.6.5)
       nio4r (~> 2.0)
     racc (1.6.0)
@@ -175,8 +180,13 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
+  base64
+  bigdecimal
   debug
   importmap-rails
+  logger
+  mutex_m
+  ostruct
   puma (~> 5.0)
   rails (~> 7.0.4)
   sprockets-rails
@@ -187,7 +197,7 @@ DEPENDENCIES
   web-console
 
 RUBY VERSION
-  ruby 3.2.10p0
+  ruby 3.4.10p0
 
 BUNDLED WITH
-   2.3.11
+  4.0.18

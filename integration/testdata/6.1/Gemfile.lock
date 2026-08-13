@@ -60,6 +60,8 @@ GEM
       minitest (>= 5.1)
       tzinfo (~> 2.0)
       zeitwerk (~> 2.3)
+    base64 (0.3.0)
+    bigdecimal (4.1.2)
     builder (3.2.4)
     concurrent-ruby (1.1.10)
     crass (1.0.6)
@@ -69,6 +71,7 @@ GEM
       activesupport (>= 5.0)
     i18n (1.12.0)
       concurrent-ruby (~> 1.0)
+    logger (1.7.0)
     loofah (2.19.0)
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
@@ -79,10 +82,12 @@ GEM
     mini_mime (1.1.2)
     mini_portile2 (2.8.0)
     minitest (5.16.3)
+    mutex_m (0.3.0)
     nio4r (2.5.8)
     nokogiri (1.13.9)
       mini_portile2 (~> 2.8.0)
       racc (~> 1.4)
+    ostruct (0.6.3)
     puma (5.6.5)
       nio4r (~> 2.0)
     racc (1.6.0)
@@ -152,15 +157,21 @@ GEM
 
 PLATFORMS
   ruby
+  x86_64-linux
 
 DEPENDENCIES
+  base64
+  bigdecimal
+  logger
+  mutex_m
+  ostruct
   puma (~> 5.0)
   rails (~> 6.1.0)
   sass-rails (>= 6)
   webpacker (~> 6.0.0.rc.6)
 
 RUBY VERSION
-  ruby 3.2.10p0
+  ruby 3.4.10p0
 
 BUNDLED WITH
-   2.2.22
+  4.0.18
