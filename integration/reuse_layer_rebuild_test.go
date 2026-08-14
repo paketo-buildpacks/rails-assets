@@ -1,6 +1,7 @@
 package integration_test
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -41,7 +42,7 @@ func testReusingLayerRebuild(t *testing.T, context spec.G, it spec.S) {
 		imageIDs = map[string]struct{}{}
 		containerIDs = map[string]struct{}{}
 
-		source, err = occam.Source(filepath.Join("testdata", "6.1"))
+		source, err = occam.Source(filepath.Join("testdata", "8.0"))
 		Expect(err).NotTo(HaveOccurred())
 	})
 
@@ -140,7 +141,18 @@ func testReusingLayerRebuild(t *testing.T, context spec.G, it spec.S) {
 
 			var path string
 			document.Find("script").Each(func(_ int, selection *goquery.Selection) {
-				path, _ = selection.Attr("src")
+				if typ, ok := selection.Attr("type"); ok && typ == "importmap" {
+					var importmap struct {
+						Imports struct {
+							GreetingControllerAsset string `json:"controllers/greeting_controller"`
+						} `json:"imports"`
+					}
+
+					err := json.Unmarshal([]byte(selection.Text()), &importmap)
+					Expect(err).NotTo(HaveOccurred())
+
+					path = importmap.Imports.GreetingControllerAsset
+				}
 			})
 
 			Eventually(firstContainer).Should(Serve(ContainSubstring("Hello from Javascript!")).OnPort(8080).WithEndpoint(path))
@@ -185,7 +197,18 @@ func testReusingLayerRebuild(t *testing.T, context spec.G, it spec.S) {
 			Expect(response.Body.Close()).To(Succeed())
 
 			document.Find("script").Each(func(_ int, selection *goquery.Selection) {
-				path, _ = selection.Attr("src")
+				if typ, ok := selection.Attr("type"); ok && typ == "importmap" {
+					var importmap struct {
+						Imports struct {
+							GreetingControllerAsset string `json:"controllers/greeting_controller"`
+						} `json:"imports"`
+					}
+
+					err := json.Unmarshal([]byte(selection.Text()), &importmap)
+					Expect(err).NotTo(HaveOccurred())
+
+					path = importmap.Imports.GreetingControllerAsset
+				}
 			})
 
 			Eventually(secondContainer).Should(Serve(ContainSubstring("Hello from Javascript!")).OnPort(8080).WithEndpoint(path))
@@ -286,8 +309,23 @@ func testReusingLayerRebuild(t *testing.T, context spec.G, it spec.S) {
 
 				var path string
 				document.Find("script").Each(func(_ int, selection *goquery.Selection) {
-					path, _ = selection.Attr("src")
+					if typ, ok := selection.Attr("type"); ok && typ == "importmap" {
+						var importmap struct {
+							Imports struct {
+								GreetingControllerAsset string `json:"controllers/greeting_controller"`
+							} `json:"imports"`
+						}
+
+						err := json.Unmarshal([]byte(selection.Text()), &importmap)
+						Expect(err).NotTo(HaveOccurred())
+
+						path = importmap.Imports.GreetingControllerAsset
+					}
 				})
+
+				if path != "" && !strings.HasPrefix(path, "/") {
+					path = "/" + path
+				}
 
 				Eventually(firstContainer).Should(Serve(ContainSubstring("Hello from Javascript!")).OnPort(8080).WithEndpoint(path))
 
@@ -331,8 +369,23 @@ func testReusingLayerRebuild(t *testing.T, context spec.G, it spec.S) {
 				Expect(response.Body.Close()).To(Succeed())
 
 				document.Find("script").Each(func(_ int, selection *goquery.Selection) {
-					path, _ = selection.Attr("src")
+					if typ, ok := selection.Attr("type"); ok && typ == "importmap" {
+						var importmap struct {
+							Imports struct {
+								GreetingControllerAsset string `json:"controllers/greeting_controller"`
+							} `json:"imports"`
+						}
+
+						err := json.Unmarshal([]byte(selection.Text()), &importmap)
+						Expect(err).NotTo(HaveOccurred())
+
+						path = importmap.Imports.GreetingControllerAsset
+					}
 				})
+
+				if path != "" && !strings.HasPrefix(path, "/") {
+					path = "/" + path
+				}
 
 				Eventually(secondContainer).Should(Serve(ContainSubstring("Hello from Javascript!")).OnPort(8080).WithEndpoint(path))
 
@@ -480,9 +533,24 @@ func testReusingLayerRebuild(t *testing.T, context spec.G, it spec.S) {
 			Expect(response.Body.Close()).To(Succeed())
 
 			var path string
-			document.Find("script").Each(func(_ int, selection *goquery.Selection) {
-				path, _ = selection.Attr("src")
-			})
+				document.Find("script").Each(func(_ int, selection *goquery.Selection) {
+					if typ, ok := selection.Attr("type"); ok && typ == "importmap" {
+						var importmap struct {
+							Imports struct {
+								GreetingControllerAsset string `json:"controllers/greeting_controller"`
+							} `json:"imports"`
+						}
+
+						err := json.Unmarshal([]byte(selection.Text()), &importmap)
+						Expect(err).NotTo(HaveOccurred())
+
+						path = importmap.Imports.GreetingControllerAsset
+					}
+				})
+
+				if path != "" && !strings.HasPrefix(path, "/") {
+					path = "/" + path
+				}
 
 			Eventually(secondContainer).Should(Serve(ContainSubstring("Hello from Javascript!")).OnPort(8080).WithEndpoint(path))
 
@@ -636,8 +704,27 @@ func testReusingLayerRebuild(t *testing.T, context spec.G, it spec.S) {
 
 				var path string
 				document.Find("script").Each(func(_ int, selection *goquery.Selection) {
-					path, _ = selection.Attr("src")
+					if typ, ok := selection.Attr("type"); ok && typ == "importmap" {
+						var importmap struct {
+							Imports struct {
+								GreetingControllerAsset string `json:"controllers/greeting_controller"`
+							} `json:"imports"`
+						}
+
+						err := json.Unmarshal([]byte(selection.Text()), &importmap)
+						Expect(err).NotTo(HaveOccurred())
+
+						path = importmap.Imports.GreetingControllerAsset
+					}
 				})
+
+				if path != "" && !strings.HasPrefix(path, "/") {
+					path = "/" + path
+				}
+
+				if path != "" && !strings.HasPrefix(path, "/") {
+					path = "/" + path
+				}
 
 				Eventually(secondContainer).Should(Serve(ContainSubstring("Hello from Javascript!")).OnPort(8080).WithEndpoint(path))
 

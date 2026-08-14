@@ -124,8 +124,8 @@ func TestIntegration(t *testing.T) {
 	settings.Docker = occam.NewDocker()
 
 	suite := spec.New("Integration", spec.Parallel(), spec.Report(report.Terminal{}))
-	suite("Rails6.1", testRails61)
-	suite("Rails7.0", testRails70)
+	suite("Rails8.0", testRails80)
+	suite("Rails8.1", testRails81)
 	suite("ReusingLayerRebuild", testReusingLayerRebuild)
 	suite.Run(t)
 }
