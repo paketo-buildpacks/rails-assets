@@ -15,7 +15,7 @@ func main() {
 	logger := scribe.NewEmitter(os.Stdout).WithLevel(os.Getenv("BP_LOG_LEVEL"))
 
 	packit.Run(
-		railsassets.Detect(railsassets.NewGemfileParser()),
+		railsassets.Detect(railsassets.NewGemfileParser(), railsassets.NewNodeLockfileChecker()),
 		railsassets.Build(
 			railsassets.NewPrecompileProcess(
 				pexec.NewExecutable("bundle"),
