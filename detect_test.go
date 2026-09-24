@@ -33,7 +33,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 
 		gemfileParser = &fakes.Parser{}
 
-		detect = railsassets.Detect(gemfileParser)
+		detect = railsassets.Detect(gemfileParser, railsassets.NewNodeLockfileChecker())
 	})
 
 	it.After(func() {
@@ -68,6 +68,29 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 			context("when the working directory contains a yarn.lock file", func() {
 				it.Before(func() {
 					Expect(os.WriteFile(filepath.Join(workingDir, "yarn.lock"), nil, 0600)).To(Succeed())
+				})
+
+				it("detects with node_modules", func() {
+					result, err := detect(packit.DetectContext{
+						WorkingDir: workingDir,
+					})
+					Expect(err).NotTo(HaveOccurred())
+					Expect(result.Plan).To(Equal(packit.BuildPlan{
+						Provides: []packit.BuildPlanProvision{},
+						Requires: []packit.BuildPlanRequirement{
+							{Name: "mri", Metadata: railsassets.BuildPlanMetadata{Build: true}},
+							{Name: "bundler", Metadata: railsassets.BuildPlanMetadata{Build: true}},
+							{Name: "gems", Metadata: railsassets.BuildPlanMetadata{Build: true}},
+							{Name: "node", Metadata: railsassets.BuildPlanMetadata{Build: true}},
+							{Name: "node_modules", Metadata: railsassets.BuildPlanMetadata{Build: true}},
+						},
+					}))
+				})
+			})
+
+			context("when the working directory contains a package-lock.json file", func() {
+				it.Before(func() {
+					Expect(os.WriteFile(filepath.Join(workingDir, "package-lock.json"), nil, 0600)).To(Succeed())
 				})
 
 				it("detects with node_modules", func() {

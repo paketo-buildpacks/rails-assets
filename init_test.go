@@ -14,5 +14,6 @@ func TestUnitRails(t *testing.T) {
 	suite("DirectorySetup", testDirectorySetup)
 	suite("GemfileParser", testGemfileParser)
 	suite("PrecompileProcess", testPrecompileProcess)
+	suite("NodeLockfileChecker", testNodeLockfileChecker)
 	suite.Run(t)
 }
